@@ -13,12 +13,13 @@ Publicada en: https://contactopixelblox-ctrl.github.io/
 | `js/app.js` | Lógica de la app |
 | `js/version.js` | Versión e historial de cambios |
 | `js/menu.js` | Menú de la app |
+| `js/splash.js` | Pantalla de carga |
 | `js/pieces.js` | Piezas en SVG |
 | `js/data/italiana.js` | Variantes de la Italiana |
 | `js/data/carokann.js` | Variantes de la Caro-Kann |
 | `js/lib/chess.min.js` | chess.js 0.10.3, minificado (incluye su licencia BSD) |
 
-Son scripts normales (sin módulos ES) que comparten el registro global `window.EA`. El orden de los `<script>` en `index.html` importa: librería, piezas, datos, versión, menú y al final `app.js`.
+Son scripts normales (sin módulos ES) que comparten el registro global `window.EA`. El orden de los `<script>` en `index.html` importa: librería, piezas, datos, versión, menú, `app.js` y al final la pantalla de carga.
 
 ## Cómo añadir una variante
 

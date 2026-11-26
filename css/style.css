@@ -426,3 +426,16 @@ button, select, .checklist-bar { touch-action: manipulation; }
 #changeLog summary { padding: 10px 0; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
 #changeLog ul { margin-bottom: 6px; }
 .menu-action { width: 100%; margin-top: 8px; }
+
+/* Pantalla de carga */
+.splash { position: fixed; inset: 0; z-index: 3000; background: var(--bg-color); display: flex; overflow-y: auto; padding: 20px; }
+.splash-box { margin: auto; width: 100%; max-width: 360px; text-align: center; display: flex; flex-direction: column; gap: 12px; }
+.splash-icon { font-size: 4rem; line-height: 1; color: var(--primary); }
+.splash h1 { font-size: 1.4rem; }
+.splash h2 { font-size: 0.95rem; margin-bottom: 6px; }
+.splash-version { font-weight: 700; color: var(--text-muted); }
+.splash-bar { height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; }
+.splash-bar div { height: 100%; background: var(--primary); animation: cargar 1.2s ease forwards; }
+@keyframes cargar { from { width: 0; } to { width: 100%; } }
+.splash-news { text-align: left; background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-size: 0.9rem; }
+.splash-news ul { padding-left: 18px; line-height: 1.4; }

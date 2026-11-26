@@ -3,6 +3,9 @@
 window.EA = window.EA || { aperturas: {} };
 
 window.EA.historial = [
+  { version: "3.3.0", fecha: "26/11/2026", cambios: [
+    "Nueva pantalla de carga con la versión y los cambios recientes."
+  ] },
   { version: "3.2.0", fecha: "26/11/2026", cambios: [
     "Nuevo menú con la versión y el historial de cambios."
   ] },
