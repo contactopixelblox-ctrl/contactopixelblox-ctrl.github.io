@@ -418,3 +418,11 @@ button, select, .checklist-bar { touch-action: manipulation; }
   .move-explanation { font-size: 0.82rem; line-height: 1.25; }
 }
 @media (prefers-reduced-motion: reduce) { .piece.shake-error { animation-duration: .01s; } }
+
+/* Menú: versión y cambios */
+.menu-btn { flex-shrink: 0; width: 40px; height: 40px; border: none; border-radius: 7px; background: #f1f5f9; color: var(--text-main); font-size: 1.2rem; cursor: pointer; }
+.menu-version { margin-bottom: 12px; font-size: 0.93rem; }
+#menuModal h4 { margin-bottom: 4px; font-size: 0.95rem; }
+#changeLog summary { padding: 10px 0; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+#changeLog ul { margin-bottom: 6px; }
+.menu-action { width: 100%; margin-top: 8px; }
