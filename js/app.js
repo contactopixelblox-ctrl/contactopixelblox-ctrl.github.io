@@ -1,6 +1,7 @@
 // Datos cargados por los scripts anteriores (registro global window.EA)
 const PIECE_SVGS = window.EA.piezas;
-const OPENING_TREES = window.EA.aperturas;
+const OPENING_TREES = Object.fromEntries(
+  Object.entries(window.EA.aperturas).map(([clave, datos]) => [clave, window.EA.construirArbol(datos)]));
 
 // Validación de legalidad de todas las variantes
 function validateAllTrees() {

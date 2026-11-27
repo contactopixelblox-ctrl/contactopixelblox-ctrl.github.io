@@ -14,6 +14,8 @@ Publicada en: https://contactopixelblox-ctrl.github.io/
 | `js/version.js` | Versión e historial de cambios |
 | `js/menu.js` | Menú de la app |
 | `js/splash.js` | Pantalla de carga |
+| `js/arbol.js` | Construye el árbol de variantes |
+| `tools/validar.js` | Valida las jugadas con chess.js (Node) |
 | `js/pieces.js` | Piezas en SVG |
 | `js/data/italiana.js` | Variantes de la Italiana |
 | `js/data/carokann.js` | Variantes de la Caro-Kann |
@@ -23,10 +25,31 @@ Son scripts normales (sin módulos ES) que comparten el registro global `window.
 
 ## Cómo añadir una variante
 
-En el archivo de la apertura, dentro de `js/data/`:
+En el archivo de la apertura (`js/data/`), añade un objeto a la lista `variantes`:
 
-1. Añade un objeto a `variants`: `{ id: "nueva", name: "Nombre visible", path: ["e4", "e5", "..."] }`. El `id` no debe repetirse y `path` usa notación en inglés (N, B, R, Q, K).
-2. En `root`, añade los nodos que falten, siguiendo las jugadas de `path`. Cada nodo es `{ san, label, reason, children: [] }`. `label` es el texto en español que se muestra. Si el comienzo coincide con otra variante, reutiliza esos nodos y crea la rama donde se separan.
+```js
+{
+  id: "mi-variante",
+  nombre: "Nombre visible",
+  jugadas: [
+    { san: "e4", razon: "..." },
+    { san: "e5", razon: "..." }
+  ]
+}
+```
+
+- `san` usa la notación en inglés (N, B, R, Q, K). La app muestra las letras en español.
+- Las jugadas iniciales compartidas con otra variante se unen solas; copia **la misma** `razon` (y `nota`, si tiene).
+- `nota` es opcional y aparece entre paréntesis junto a la jugada.
+- No hace falta tocar la lógica.
+
+Los `desvios` son jugadas del rival fuera del libro: `{ tras: ["e4"], san: "c5" }`.
+
+Después ejecuta:
+
+```
+node tools/validar.js
+```
 
 ## Cómo probarla
 
