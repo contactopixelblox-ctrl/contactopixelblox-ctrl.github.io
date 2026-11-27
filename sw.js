@@ -1,6 +1,6 @@
 // Service worker: primero la red (para recibir cambios) y, si falla o tarda, la copia guardada.
 // Al publicar una versión, cambia VERSION (tools/validar.js comprueba que coincida).
-const VERSION = "5.3.0";
+const VERSION = "5.4.0";
 const CACHE = "ea-" + VERSION;
 const CON_VERSION = [
   "css/style.css",
@@ -17,7 +17,9 @@ const CON_VERSION = [
   "js/app.js",
   "js/analisis.js",
   "js/pgn.js",
+  "js/srs.js",
   "js/lecciones.js",
+  "js/atras.js",
   "js/splash.js",
   "js/offline.js"
 ];

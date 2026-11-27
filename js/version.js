@@ -3,6 +3,13 @@
 window.EA = window.EA || { aperturas: {} };
 
 window.EA.historial = [
+  { version: "5.4.0", fecha: "27/11/2026", cambios: [
+    "Nuevo Repaso espaciado con las posiciones de tus lecciones.",
+    "Aprender ahora es «Ver línea», dentro de Práctica.",
+    "La barra tiene Lecciones y Repaso, con las pendientes.",
+    "Cada lección guarda el paso en el que te quedaste.",
+    "El botón Atrás de Android cierra la ventana abierta."
+  ] },
   { version: "5.3.0", fecha: "27/11/2026", cambios: [
     "Nuevo botón Curso: Italiana desde cero.",
     "Lección 1: centro, desarrollo y rey seguro.",

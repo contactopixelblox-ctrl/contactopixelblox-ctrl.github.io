@@ -21,7 +21,7 @@ const btnPrev = $("btnPrev"), btnNext = $("btnNext"), btnContinue = $("btnContin
 const autoToggle = $("autoToggle"), checklistModal = $("checklistModal");
 
 let currentOpeningKey = "italiana";
-let currentMode = "learn";
+let currentMode = "practice";
 let selectedVariantId = "giuoco";
 let game = new Chess();
 let activeLine = [];
@@ -111,6 +111,17 @@ function bindTabs(containerId, onPick) {
 bindTabs("openingTabs", d => currentOpeningKey = d.opening);
 bindTabs("modeTabs", d => currentMode = d.mode);
 
+// "Ver línea" vive dentro de Práctica y conserva la variante elegida
+function cambiarVista(modo) {
+  const elegida = selectedVariantId;
+  currentMode = modo;
+  populateVariantSelector();
+  if ([...variantSelect.options].some(o => o.value === elegida)) selectedVariantId = variantSelect.value = elegida;
+  resetSession();
+}
+$("btnViewLine").addEventListener("click", () => cambiarVista("learn"));
+$("btnPlayLine").addEventListener("click", () => cambiarVista("practice"));
+
 variantSelect.addEventListener("change", () => {
   selectedVariantId = variantSelect.value;
   if (currentMode === "ai") store.set("ai", selectedVariantId);
@@ -180,7 +191,7 @@ function resetSession() {
 
   const op = opening();
   const ai = currentMode === "ai";
-  $("screenTitle").textContent = { learn: "Aprender", practice: "Práctica", ai: "Jugar contra la IA" }[currentMode];
+  $("screenTitle").textContent = { learn: "Ver línea", practice: "Práctica", ai: "Jugar contra la IA" }[currentMode];
   $("openingTitle").textContent = ai ? "Partida contra la IA" : op.name;
   $("openingTabs").style.display = ai ? "none" : "";
   $("aiControls").style.display = ai ? "grid" : "none";

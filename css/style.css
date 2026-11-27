@@ -102,7 +102,12 @@ body:not(.reviewing) .review-only { display: none; }
 
 /* Navegación inferior */
 .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 100; display: flex; background: var(--card-bg); border-top: 1px solid var(--line); padding: 0 6px env(safe-area-inset-bottom); }
-.nav-modes { display: flex; flex: 3; }
+.nav-modes { display: flex; flex: 2; }
+#btnReview { position: relative; }
+#rvCount { position: absolute; top: 5px; left: calc(50% + 7px); min-width: 18px; padding: 0 4px; border-radius: 9px; background: var(--error); color: #fff; font-size: 0.68rem; line-height: 18px; }
+#rvCount[hidden] { display: none; }
+#practiceControls { grid-template-columns: repeat(3, 1fr); }
+#btnPlayLine { grid-column: 1 / -1; }
 .bottom-nav button { flex: 1; height: var(--nav-h); border: none; background: transparent; border-radius: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); cursor: pointer; padding: 2px; }
 .bottom-nav button span { font-size: 1.2rem; line-height: 1.1; }
 .bottom-nav .tab-btn.active { color: var(--primary); box-shadow: inset 0 3px 0 var(--primary); }
@@ -302,6 +307,10 @@ body.reviewing .board-wrapper { width: min(100%, max(288px, calc(100dvh - 390px)
 .ls-feedback.mal { border-left-color: var(--error); }
 .ls-feedback.pista { border-left-color: var(--warning-border); }
 .ls-nav { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; flex-shrink: 0; }
+.ls-nav.review { grid-template-columns: 1fr; }
+.rs-text { font-size: 1rem; line-height: 1.45; }
+.rs-nota { font-size: 0.84rem; line-height: 1.4; color: var(--text-muted); }
+#lsList > * { flex-shrink: 0; }
 @media (orientation: landscape) and (max-height: 600px) {
   .course-box { max-width: 900px; }
   #lsPlayer { display: grid; grid-template-columns: calc(100dvh - 90px) 1fr; grid-template-rows: auto 1fr auto; column-gap: 12px; }

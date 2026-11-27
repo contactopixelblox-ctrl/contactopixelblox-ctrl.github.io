@@ -2,6 +2,7 @@ window.EA = window.EA || { aperturas: {} };
 
 // Curso "Italiana desde cero". Cada paso parte de "tras" (jugadas desde el inicio) o de "fen".
 // Paso sin "correctas": explicación. Con "correctas": pregunta que se responde moviendo.
+// "repaso" (opcional) reemplaza a "texto" en el repaso, si el texto revela la respuesta.
 // flechas: [desde, hasta, color]; marcas: casillas resaltadas. Colores: verde (por defecto), azul, rojo.
 (function () {
   const CENTRO = ["d4", "e4", "d5", "e5"];
@@ -64,6 +65,7 @@ window.EA = window.EA || { aperturas: {} };
             texto: "Cuando el centro se abre, un rey que sigue en medio recibe ataques. El enroque lo lleva hacia un lado y acerca una torre al centro. Solo se puede si el rey y esa torre no se han movido, no hay piezas entre ellos, no estás en jaque y el rey no pasa ni termina en una casilla atacada." },
           { titulo: "Tu turno: protege a tu rey", tras: INICIO_ITALIANA,
             texto: "Haz el enroque corto. Mueve el rey dos casillas hacia la torre.",
+            repaso: "Tu rey sigue en el centro. Ponlo a salvo.",
             pista: ["e1","g1"],
             correctas: { "O-O": "¡Perfecto! El rey queda protegido tras sus peones y la torre pasa a f1." },
             errores: {

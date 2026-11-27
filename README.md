@@ -1,6 +1,6 @@
 # ChessClau
 
-App web para aprender la **Apertura Italiana** (con blancas) y la **Defensa Caro-Kann** (con negras). Tiene modos Aprender, Práctica y Vs IA (tres niveles). Es HTML, CSS y JavaScript sin compilación ni dependencias externas.
+App web para aprender la **Apertura Italiana** (con blancas) y la **Defensa Caro-Kann** (con negras). Tiene Lecciones, Repaso, Práctica (con «Ver línea») y Vs IA (tres niveles). Es HTML, CSS y JavaScript sin compilación ni dependencias externas.
 
 Publicada en: https://contactopixelblox-ctrl.github.io/
 
@@ -9,7 +9,11 @@ Toca **PGN** en la barra inferior, pega el texto (o abre un archivo `.pgn`), eli
 
 ## Curso «Italiana desde cero»
 
-Botón **Curso** de la barra inferior. Por ahora tiene 2 lecciones. Los textos y posiciones están en `js/data/curso-italiana.js` (el formato se explica al inicio del archivo) y el reproductor en `js/lecciones.js`, con su propio tablero. Las lecciones completadas se guardan en el teléfono (`ea_curso`). Todavía no hay repaso espaciado. `tools/validar.js` comprueba que las jugadas del curso sean legales.
+Botón **Lecciones** de la barra inferior. Por ahora tiene 2 lecciones. Los textos y posiciones están en `js/data/curso-italiana.js` (el formato se explica al inicio del archivo) y el reproductor en `js/lecciones.js`, con su propio tablero. Las lecciones completadas se guardan en el teléfono (`ea_curso`). El paso de una lección sin terminar se guarda en `ea_curso_paso`. `tools/validar.js` comprueba que las jugadas del curso sean legales.
+
+## Repaso espaciado
+
+Botón **Repaso**. Las tarjetas salen de las preguntas de las lecciones completadas, una por posición (`js/srs.js`). Un acierto sin ayuda la programa a 1, 3, 7, 14 y luego cada 30 días. Un fallo o una pista la devuelve a mañana y se repite al final de la sesión. Si dos lecciones usan la misma posición, manda la más nueva; lo que aceptaba la anterior no cuenta como fallo. Si cambia la respuesta, la tarjeta vuelve a quedar pendiente. El calendario se guarda solo en el teléfono (`ea_repaso`).
 
 ## Estructura
 
@@ -19,6 +23,8 @@ Botón **Curso** de la barra inferior. Por ahora tiene 2 lecciones. Los textos y
 | `css/style.css` | Estilos |
 | `js/app.js` | Lógica de la app |
 | `js/version.js` | Versión e historial de cambios |
+| `js/srs.js` | Cálculo del repaso espaciado |
+| `js/atras.js` | Botón Atrás de Android |
 | `js/menu.js` | Menú de la app |
 | `js/splash.js` | Pantalla de carga |
 | `js/arbol.js` | Construye el árbol de variantes |
@@ -68,7 +74,7 @@ node tools/validar.js
 
 - Abre `index.html` en el navegador (funciona también como archivo local, manteniendo las carpetas).
 - Si una variante está mal escrita, la consola del navegador muestra `Línea inválida`.
-- Recorre la variante nueva en **Aprender** y luego en **Práctica**.
+- Recorre la variante nueva en **Práctica → Ver línea** y luego juégala en **Práctica**.
 
 ## Cómo publicar una versión
 
