@@ -3,6 +3,12 @@
 window.EA = window.EA || { aperturas: {} };
 
 window.EA.historial = [
+  { version: "5.3.0", fecha: "27/11/2026", cambios: [
+    "Nuevo botón Curso: Italiana desde cero.",
+    "Lección 1: centro, desarrollo y rey seguro.",
+    "Lección 2: 1.e4, 2.Cf3 y 3.Ac4, con el porqué de cada una.",
+    "Flechas, casillas marcadas, preguntas moviendo piezas y explicación de errores."
+  ] },
   { version: "5.2.0", fecha: "27/11/2026", cambios: [
     "La app ahora se llama ChessClau.",
     "Créditos de los creadores en Más."

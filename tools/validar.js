@@ -71,6 +71,23 @@ Object.entries(window.EA.aperturas).forEach(([clave, apertura]) => {
   });
 });
 
+// Curso: las posiciones, respuestas, errores previstos y pistas deben ser legales
+let pasosCurso = 0;
+(window.EA.curso?.lecciones || []).forEach(l => l.pasos.forEach((p, i) => {
+  pasosCurso++;
+  const donde = `curso/${l.id} paso ${i + 1}`;
+  const game = p.fen ? new Chess(p.fen) : new Chess();
+  for (const san of p.tras || []) if (!game.move(san)) return errores.push(`${donde}: "${san}" ilegal en "tras"`);
+  if (!p.correctas) return;
+  const legales = game.moves().map(s => s.replace(/[+#]/g, ""));
+  [...Object.keys(p.correctas), ...Object.keys(p.errores || {})].forEach(san => {
+    if (!legales.includes(san)) errores.push(`${donde}: "${san}" no es legal`);
+  });
+  if (!p.otro || !p.pista) return errores.push(`${donde}: faltan "otro" o "pista"`);
+  const m = game.move({ from: p.pista[0], to: p.pista[1] });
+  if (!m || !p.correctas[m.san]) errores.push(`${donde}: la pista no lleva a una respuesta correcta`);
+}));
+
 // Si existe la parte sin conexión, la versión y la lista de archivos deben coincidir
 const swPath = path.join(root, "sw.js");
 if (fs.existsSync(swPath)) {
@@ -93,4 +110,4 @@ if (errores.length) {
   console.error(errores.join("\n"));
   process.exit(1);
 }
-console.log(`OK: ${total} variantes con jugadas legales.`);
+console.log(`OK: ${total} variantes con jugadas legales y ${pasosCurso} pasos del curso.`);

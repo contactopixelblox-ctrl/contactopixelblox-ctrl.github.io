@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/style.css?v=5.2.0">
+  <link rel="stylesheet" href="css/style.css?v=5.3.0">
 </head>
 <body>
 
@@ -135,6 +135,7 @@
       <button class="tab-btn" data-mode="practice"><span aria-hidden="true">🎯</span>Práctica</button>
       <button class="tab-btn" data-mode="ai"><span aria-hidden="true">♟️</span>Vs IA</button>
     </div>
+    <button type="button" id="btnCourse" aria-haspopup="dialog"><span aria-hidden="true">🎓</span>Curso</button>
     <button type="button" id="btnPgn" aria-haspopup="dialog"><span aria-hidden="true">🔍</span>PGN</button>
     <button type="button" class="nav-more" id="btnMenu" aria-haspopup="dialog"><span aria-hidden="true">☰</span>Más</button>
   </nav>
@@ -158,6 +159,36 @@
       <h3 id="analysisTitle">Análisis de la partida</h3>
       <div id="analysisBody"></div>
       <button type="button" class="btn btn-primary" id="btnCloseAnalysis">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Curso por lecciones -->
+  <div class="modal-overlay course" id="courseModal">
+    <div class="course-box" role="dialog" aria-modal="true" aria-labelledby="lsTitle">
+      <div class="ls-head">
+        <button type="button" class="head-btn" id="lsBack" aria-label="Volver a las lecciones" hidden>←</button>
+        <h3 id="lsTitle">Curso</h3>
+        <button type="button" class="head-btn" id="lsClose">Cerrar</button>
+      </div>
+      <div id="lsList"></div>
+      <div id="lsPlayer" hidden>
+        <div class="ls-progress"><div id="lsBar"></div></div>
+        <div class="ls-board" id="lsBoard">
+          <div class="board-grid" id="lsGrid"></div>
+          <svg id="lsArrows" viewBox="0 0 8 8" aria-hidden="true"></svg>
+        </div>
+        <div id="lsCard" aria-live="polite">
+          <p id="lsKind"></p>
+          <h4 id="lsStepTitle"></h4>
+          <p id="lsText"></p>
+          <p class="ls-feedback" id="lsFeedback" hidden></p>
+        </div>
+        <div class="ls-nav">
+          <button type="button" class="btn btn-secondary" id="lsPrev">← Atrás</button>
+          <button type="button" class="btn btn-secondary" id="lsHint">Pista</button>
+          <button type="button" class="btn btn-primary" id="lsNext">Siguiente →</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -225,19 +256,21 @@
     </div>
   </div>
 
-  <script src="js/lib/chess.min.js?v=5.2.0"></script>
-  <script src="js/pieces.js?v=5.2.0"></script>
-  <script src="js/data/italiana.js?v=5.2.0"></script>
-  <script src="js/data/carokann.js?v=5.2.0"></script>
-  <script src="js/arbol.js?v=5.2.0"></script>
-  <script src="js/motor.js?v=5.2.0"></script>
-  <script src="js/sonidos.js?v=5.2.0"></script>
-  <script src="js/version.js?v=5.2.0"></script>
-  <script src="js/menu.js?v=5.2.0"></script>
-  <script src="js/app.js?v=5.2.0"></script>
-  <script src="js/analisis.js?v=5.2.0"></script>
-  <script src="js/pgn.js?v=5.2.0"></script>
-  <script src="js/splash.js?v=5.2.0"></script>
-  <script src="js/offline.js?v=5.2.0"></script>
+  <script src="js/lib/chess.min.js?v=5.3.0"></script>
+  <script src="js/pieces.js?v=5.3.0"></script>
+  <script src="js/data/italiana.js?v=5.3.0"></script>
+  <script src="js/data/carokann.js?v=5.3.0"></script>
+  <script src="js/data/curso-italiana.js?v=5.3.0"></script>
+  <script src="js/arbol.js?v=5.3.0"></script>
+  <script src="js/motor.js?v=5.3.0"></script>
+  <script src="js/sonidos.js?v=5.3.0"></script>
+  <script src="js/version.js?v=5.3.0"></script>
+  <script src="js/menu.js?v=5.3.0"></script>
+  <script src="js/app.js?v=5.3.0"></script>
+  <script src="js/analisis.js?v=5.3.0"></script>
+  <script src="js/pgn.js?v=5.3.0"></script>
+  <script src="js/lecciones.js?v=5.3.0"></script>
+  <script src="js/splash.js?v=5.3.0"></script>
+  <script src="js/offline.js?v=5.3.0"></script>
 </body>
 </html>

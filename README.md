@@ -7,6 +7,10 @@ Publicada en: https://contactopixelblox-ctrl.github.io/
 ## Analizar una partida PGN
 Toca **PGN** en la barra inferior, pega el texto (o abre un archivo `.pgn`), elige tu color y toca **Analizar partida**. Si el archivo trae varias partidas, se elige una. Se ignoran comentarios, relojes y variantes entre paréntesis. Solo partidas desde la posición inicial. La app recuerda tu nombre de jugador en el teléfono para marcar tu color la próxima vez. El lector está en `js/pgn.js`.
 
+## Curso «Italiana desde cero»
+
+Botón **Curso** de la barra inferior. Por ahora tiene 2 lecciones. Los textos y posiciones están en `js/data/curso-italiana.js` (el formato se explica al inicio del archivo) y el reproductor en `js/lecciones.js`, con su propio tablero. Las lecciones completadas se guardan en el teléfono (`ea_curso`). Todavía no hay repaso espaciado. `tools/validar.js` comprueba que las jugadas del curso sean legales.
+
 ## Estructura
 
 | Archivo | Contenido |

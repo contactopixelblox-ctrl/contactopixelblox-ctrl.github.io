@@ -273,3 +273,39 @@ body.reviewing .board-wrapper { width: min(100%, max(288px, calc(100dvh - 390px)
   .rv-graph { height: 28px; }
 }
 @media (prefers-reduced-motion: reduce) { .piece.shake-error { animation-duration: 0.01s; } .eval-fill { transition: none; } }
+
+/* ===== Curso por lecciones ===== */
+.course { padding: 0; background: var(--bg-color); }
+.course-box { width: 100%; max-width: 480px; height: 100dvh; display: flex; flex-direction: column; gap: 8px; padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)); }
+.course [hidden] { display: none !important; }
+.ls-head { display: flex; align-items: center; gap: 8px; }
+.ls-head h3 { flex: 1; font-size: 1.1rem; }
+#lsList { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+.ls-item { display: flex; align-items: center; gap: 12px; text-align: left; background: var(--card-bg); border: 1px solid var(--line); border-radius: 13px; padding: 14px; cursor: pointer; }
+.ls-item strong { display: block; font-size: 1rem; }
+.ls-item small { display: block; margin-top: 3px; font-size: 0.84rem; color: var(--text-muted); }
+.ls-num { width: 38px; height: 38px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 800; }
+.ls-num.done { background: var(--success); }
+#lsPlayer { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.ls-progress { height: 7px; flex-shrink: 0; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.ls-progress div { height: 100%; background: var(--success); transition: width 0.25s ease; }
+.ls-board { position: relative; align-self: center; flex-shrink: 0; width: min(100%, max(248px, calc(100dvh - 330px))); aspect-ratio: 1 / 1; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.ls-board svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+.square.ls-mark { box-shadow: inset 0 0 0 4px #f0a01a; }
+.square.ls-mark::before { content: ""; position: absolute; inset: 0; background: rgba(255, 184, 28, 0.38); pointer-events: none; }
+#lsCard { flex: 1; min-height: 0; overflow-y: auto; background: var(--card-bg); border-radius: 12px; padding: 10px 12px; }
+#lsKind { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+#lsStepTitle { font-size: 1.02rem; margin: 3px 0 5px; }
+#lsText { font-size: 0.92rem; line-height: 1.42; }
+.ls-feedback { margin-top: 8px; padding: 8px 10px; border-radius: 9px; border-left: 4px solid var(--primary); background: var(--surface-2); font-size: 0.9rem; line-height: 1.38; }
+.ls-feedback.ok { border-left-color: var(--success); }
+.ls-feedback.mal { border-left-color: var(--error); }
+.ls-feedback.pista { border-left-color: var(--warning-border); }
+.ls-nav { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; flex-shrink: 0; }
+@media (orientation: landscape) and (max-height: 600px) {
+  .course-box { max-width: 900px; }
+  #lsPlayer { display: grid; grid-template-columns: calc(100dvh - 90px) 1fr; grid-template-rows: auto 1fr auto; column-gap: 12px; }
+  .ls-progress { grid-column: 1 / -1; }
+  .ls-board { grid-column: 1; grid-row: 2 / span 2; width: 100%; align-self: start; }
+  #lsCard, .ls-nav { grid-column: 2; }
+}
