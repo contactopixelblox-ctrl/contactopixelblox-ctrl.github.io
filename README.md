@@ -1,6 +1,6 @@
 # Entrenador de Aperturas
 
-App web para aprender la **Apertura Italiana** (con blancas) y la **Defensa Caro-Kann** (con negras). Tiene modo Aprender y modo Práctica. Es HTML, CSS y JavaScript sin compilación ni dependencias externas.
+App web para aprender la **Apertura Italiana** (con blancas) y la **Defensa Caro-Kann** (con negras). Tiene modos Aprender, Práctica y Vs IA (tres niveles). Es HTML, CSS y JavaScript sin compilación ni dependencias externas.
 
 Publicada en: https://contactopixelblox-ctrl.github.io/
 
@@ -19,6 +19,7 @@ Publicada en: https://contactopixelblox-ctrl.github.io/
 | `js/motor.js` | Motor que elige las jugadas libres y las de la IA |
 | `sw.js`, `js/offline.js` | Uso sin conexión |
 | `manifest.webmanifest`, `icons/` | Instalación en Android |
+| `js/sonidos.js` | Sonidos generados con Web Audio (sin archivos de audio) |
 | `js/pieces.js` | Piezas en SVG |
 | `js/data/italiana.js` | Variantes de la Italiana |
 | `js/data/carokann.js` | Variantes de la Caro-Kann |

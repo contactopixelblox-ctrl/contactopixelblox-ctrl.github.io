@@ -38,12 +38,13 @@
       <div class="tab-group" id="modeTabs">
         <button class="tab-btn active" data-mode="learn">Aprender</button>
         <button class="tab-btn" data-mode="practice">Práctica</button>
+        <button class="tab-btn" data-mode="ai">Vs IA</button>
       </div>
     </div>
 
     <!-- Selector de Variante -->
     <div class="variant-row">
-      <label for="variantSelect">Variante:</label>
+      <label for="variantSelect" id="variantLabel">Variante:</label>
       <select id="variantSelect" class="variant-select" aria-label="Variante"></select>
       <button type="button" class="menu-btn" id="btnMenu" aria-label="Menú, versión y cambios" aria-haspopup="dialog">☰</button>
     </div>
@@ -82,6 +83,12 @@
       <button class="btn btn-primary" id="btnNext">Siguiente →</button>
     </div>
 
+    <!-- Controles Vs IA -->
+    <div class="action-buttons" id="aiControls" style="display: none;">
+      <button class="btn btn-secondary" id="btnUndoAi" disabled>↶ Deshacer</button>
+      <button class="btn btn-primary" id="btnNewAi">Nueva partida</button>
+    </div>
+
     <!-- Controles Práctica -->
     <div class="action-buttons" id="practiceControls" style="display: none;">
       <button class="btn btn-secondary" id="btnRestartPractice">Reiniciar</button>
@@ -108,6 +115,7 @@
       <h3 id="menuTitle">Menú</h3>
       <p class="menu-version">Versión instalada: <strong id="appVersion">?</strong></p>
       <p class="menu-version" id="offlineStatus"></p>
+      <label class="menu-option"><input type="checkbox" id="soundToggle"> Sonidos</label>
       <h4>Historial de cambios</h4>
       <div id="changeLog"></div>
       <button type="button" class="btn btn-secondary menu-action" id="btnReload">Recargar app</button>
@@ -121,6 +129,7 @@
   <script src="js/data/carokann.js?v=3.3.0"></script>
   <script src="js/arbol.js?v=3.3.0"></script>
   <script src="js/motor.js?v=3.3.0"></script>
+  <script src="js/sonidos.js?v=3.3.0"></script>
   <script src="js/version.js?v=3.3.0"></script>
   <script src="js/menu.js?v=3.3.0"></script>
   <script src="js/app.js?v=3.3.0"></script>

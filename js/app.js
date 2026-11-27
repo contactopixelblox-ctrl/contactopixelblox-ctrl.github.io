@@ -70,12 +70,25 @@ function extractLineFromTree(rootNodes, sanPath) {
 
 const opening = () => OPENING_TREES[currentOpeningKey];
 
+// Modo Vs IA: el valor del selector es "color:nivel"
+const AI_OPTIONS = [];
+[["w", "Blancas"], ["b", "Negras"]].forEach(([color, texto]) =>
+  [["facil", "Fácil"], ["medio", "Medio"], ["dificil", "Difícil"]].forEach(([nivel, n]) =>
+    AI_OPTIONS.push({ id: `${color}:${nivel}`, name: `${texto} · ${n}` })));
+const aiLevel = () => selectedVariantId.split(":")[1];
+const userColor = () => currentMode === "ai" ? selectedVariantId.split(":")[0] : opening().userColor;
+
 function populateVariantSelector() {
   variantSelect.innerHTML = "";
-  const list = opening().variants.slice();
+  const ai = currentMode === "ai";
+  const list = ai ? AI_OPTIONS : opening().variants.slice();
   if (currentMode === "practice") list.unshift({ id: "random", name: "Aleatoria (el rival elige)" });
   list.forEach(v => variantSelect.add(new Option(v.name, v.id)));
-  selectedVariantId = list[0].id;
+  selectedVariantId = ai ? store.get("ai", "w:facil") : list[0].id;
+  if (!list.some(v => v.id === selectedVariantId)) selectedVariantId = list[0].id;
+  variantSelect.value = selectedVariantId;
+  $("variantLabel").textContent = ai ? "Tú · Nivel:" : "Variante:";
+  variantSelect.setAttribute("aria-label", ai ? "Tu color y nivel de la IA" : "Variante");
 }
 
 function setCard(title, text, cls = "") {
@@ -96,7 +109,13 @@ function bindTabs(containerId, onPick) {
 bindTabs("openingTabs", d => currentOpeningKey = d.opening);
 bindTabs("modeTabs", d => currentMode = d.mode);
 
-variantSelect.addEventListener("change", () => { selectedVariantId = variantSelect.value; resetSession(); });
+variantSelect.addEventListener("change", () => {
+  selectedVariantId = variantSelect.value;
+  if (currentMode === "ai") store.set("ai", selectedVariantId);
+  resetSession();
+});
+$("btnNewAi").addEventListener("click", () => resetSession());
+$("btnUndoAi").addEventListener("click", () => undoAi());
 $("checklistBanner").addEventListener("click", () => checklistModal.classList.add("open"));
 $("btnCloseModal").addEventListener("click", () => checklistModal.classList.remove("open"));
 checklistModal.addEventListener("click", e => { if (e.target === checklistModal) checklistModal.classList.remove("open"); });
@@ -156,7 +175,18 @@ function resetSession() {
   plannedDeviation = null;
 
   const op = opening();
-  $("openingTitle").textContent = op.name;
+  const ai = currentMode === "ai";
+  $("openingTitle").textContent = ai ? "Partida contra la IA" : op.name;
+  $("openingTabs").style.display = ai ? "none" : "";
+  $("aiControls").style.display = ai ? "grid" : "none";
+  if (ai) {
+    ["learnControls", "practiceControls", "autoRow"].forEach(id => $(id).style.display = "none");
+    activeLine = [];
+    renderBoard();
+    updateStats();
+    updateUndo();
+    return userColor() === "w" ? aiUserTurn() : aiTurn();
+  }
   const learn = currentMode === "learn";
   $("learnControls").style.display = learn ? "grid" : "none";
   $("practiceControls").style.display = learn ? "none" : "grid";
@@ -229,6 +259,64 @@ function waitThen(next, title, text, cls) {
   }
 }
 
+/* Modo Vs IA */
+function updateUndo() {
+  // Se puede deshacer cuando ya hiciste al menos una jugada y la IA no está pensando
+  const mine = game.history().length >= (userColor() === "w" ? 1 : 2);
+  $("btnUndoAi").disabled = !mine || (isLocked && !game.game_over());
+}
+
+function aiUserTurn(last) {
+  if (game.game_over()) return finishAi();
+  isLocked = false;
+  $("stepCounter").textContent = `Jugada ${Math.floor(game.history().length / 2) + 1}`;
+  const check = game.in_check();
+  setCard(check ? "¡Jaque! Tu turno" : "Tu turno",
+    (last ? `La IA jugó ${window.EA.aEspanol(last)}. ` : "") + "Antes de mover, revisa el checklist.",
+    check ? "feedback-warn" : "");
+  updateUndo();
+}
+
+function aiTurn() {
+  if (game.game_over()) return finishAi();
+  isLocked = true;
+  setCard("La IA está pensando…", "Espera un momento.");
+  updateUndo();
+  // La pausa permite pintar la pantalla antes de calcular
+  later(() => executeMove(window.EA.motor.elegir(game.fen(), aiLevel()), m => aiUserTurn(m.san)), 350);
+}
+
+function finishAi() {
+  isLocked = true;
+  $("stepCounter").textContent = "Terminada";
+  let title = "Tablas", text = "Empate por la regla de 50 movimientos.", cls = "feedback-warn";
+  if (game.in_checkmate()) {
+    const won = game.turn() !== userColor();
+    title = won ? "¡Ganaste por jaque mate!" : "Perdiste por jaque mate";
+    text = won ? "Buena partida." : "Toca «Deshacer» y busca la defensa que faltó.";
+    cls = won ? "feedback-success" : "feedback-error";
+    sound(won ? "exito" : "derrota");
+  } else if (game.in_stalemate()) text = "Rey ahogado.";
+  else if (game.insufficient_material()) text = "No hay piezas suficientes para dar mate.";
+  else if (game.in_threefold_repetition()) text = "La posición se repitió tres veces.";
+  setCard(title, text, cls);
+  updateUndo();
+}
+
+function undoAi() {
+  if ($("btnUndoAi").disabled) return;
+  session++;
+  timers.forEach(clearTimeout);
+  timers.clear();
+  let m;
+  do { m = game.undo(); } while (m && m.color !== userColor());
+  const h = game.history({ verbose: true }).pop();
+  lastMove = h ? [h.from, h.to] : [];
+  clearSelection();
+  renderBoard();
+  aiUserTurn();
+}
+
 function updateLearnUI() {
   $("stepCounter").textContent = `Paso ${currentStep} / ${activeLine.length}`;
   btnPrev.disabled = currentStep === 0;
@@ -286,6 +374,7 @@ function opponentTurn() {
 function finishLine(prev) {
   isLocked = true;
   $("stepCounter").textContent = "Completado";
+  later(() => sound("exito"), 150);
   // Identifica qué variante se jugó (útil en modo aleatorio)
   const played = game.history().join(" ");
   const done = opening().variants.find(v => v.path.join(" ") === played);
@@ -316,6 +405,7 @@ function handleUserMove(from, to) {
   const attempt = new Chess(game.fen()).move({ from, to, promotion: "q" });
   if (!attempt) return shake(from);
 
+  if (currentMode === "ai") return executeMove({ from, to, promotion: "q" }, () => aiTurn());
   if (freeMoves !== null) return freeUserMove(from, to);
 
   if (currentMode === "learn") {
@@ -363,6 +453,8 @@ function wrongMove(from, node, several = false) {
   shake(from);
 }
 
+const sound = type => window.EA.sonido && window.EA.sonido.tocar(type);
+
 const squareEl = name => boardGrid.querySelector(`[data-square="${name}"]`);
 
 function slide(fromName, toName) {
@@ -391,6 +483,7 @@ function executeMove(san, onComplete) {
   if (m.flags.includes("k")) slide("h" + m.from[1], "f" + m.from[1]);
   if (m.flags.includes("q")) slide("a" + m.from[1], "d" + m.from[1]);
 
+  sound(game.in_check() ? "jaque" : m.captured ? "captura" : "mover");
   later(() => {
     lastMove = [m.from, m.to];
     renderBoard();
@@ -400,6 +493,7 @@ function executeMove(san, onComplete) {
 }
 
 function shake(fromName) {
+  sound("error");
   clearSelection();
   updateHighlights();
   const p = squareEl(fromName)?.querySelector(".piece");
@@ -430,7 +524,7 @@ function updateHighlights() {
 function renderBoard() {
   endDrag();
   boardGrid.innerHTML = "";
-  const flipped = opening().userColor === "b";
+  const flipped = userColor() === "b";
   const files = [..."abcdefgh"], ranks = [..."87654321"];
   if (flipped) { files.reverse(); ranks.reverse(); }
   ranks.forEach((rank, r) => files.forEach((file, f) => {
@@ -476,7 +570,7 @@ boardGrid.addEventListener("pointerdown", e => {
 
   const info = game.get(name);
   const mine = info && info.color === game.turn() &&
-    (currentMode === "learn" || info.color === opening().userColor);
+    (currentMode === "learn" || info.color === userColor());
   if (!mine) { clearSelection(); return updateHighlights(); }
 
   drag = { from: name, piece: el.querySelector(".piece"), x: e.clientX, y: e.clientY,

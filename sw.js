@@ -10,6 +10,7 @@ const CON_VERSION = [
   "js/data/carokann.js",
   "js/arbol.js",
   "js/motor.js",
+  "js/sonidos.js",
   "js/version.js",
   "js/menu.js",
   "js/app.js",
