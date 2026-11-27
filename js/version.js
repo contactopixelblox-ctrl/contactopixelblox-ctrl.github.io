@@ -3,6 +3,13 @@
 window.EA = window.EA || { aperturas: {} };
 
 window.EA.historial = [
+  { version: "5.0.0", fecha: "27/11/2026", cambios: [
+    "Diseño nuevo con tema oscuro (o claro) y navegación abajo.",
+    "Revisión sobre el tablero con un símbolo de color en cada jugada.",
+    "Flecha con la mejor jugada, barra de ventaja y gráfica.",
+    "Nueva categoría: Gran jugada.",
+    "Pantalla Más con ajustes y tu progreso."
+  ] },
   { version: "4.1.0", fecha: "26/11/2026", cambios: [
     "Análisis de partidas Vs IA con Stockfish.",
     "Cuenta jugadas de libro, brillantes, buenas, imprecisiones y errores.",

@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Entrenador de Aperturas - Italiana y Caro-Kann</title>
-  <meta name="theme-color" content="#f4f6f8">
+  <meta name="theme-color" content="#161a22">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/style.css?v=4.1.0">
+  <link rel="stylesheet" href="css/style.css?v=5.0.0">
 </head>
 <body>
 
@@ -29,16 +29,18 @@
   </div>
 
   <div class="app-container">
-    <!-- Selección de Apertura y Modo -->
+    <header class="app-header">
+      <span class="app-logo" aria-hidden="true">♞</span>
+      <h1 id="screenTitle">Aprender</h1>
+      <button type="button" class="head-btn review-only" id="btnSummary">Resumen</button>
+      <button type="button" class="head-btn review-only" id="btnExitReview" aria-label="Salir de la revisión">✕</button>
+    </header>
+
+    <!-- Selección de Apertura -->
     <div class="controls-top">
       <div class="tab-group" id="openingTabs">
         <button class="tab-btn active" data-opening="italiana">Italiana (B)</button>
         <button class="tab-btn" data-opening="carokann">Caro-Kann (N)</button>
-      </div>
-      <div class="tab-group" id="modeTabs">
-        <button class="tab-btn active" data-mode="learn">Aprender</button>
-        <button class="tab-btn" data-mode="practice">Práctica</button>
-        <button class="tab-btn" data-mode="ai">Vs IA</button>
       </div>
     </div>
 
@@ -46,13 +48,17 @@
     <div class="variant-row">
       <label for="variantSelect" id="variantLabel">Variante:</label>
       <select id="variantSelect" class="variant-select" aria-label="Variante"></select>
-      <button type="button" class="menu-btn" id="btnMenu" aria-label="Menú, versión y cambios" aria-haspopup="dialog">☰</button>
     </div>
 
     <!-- Checklist antes de mover -->
     <div class="checklist-bar" id="checklistBanner" role="button" tabindex="0">
       <span>¿Dejo algo colgado? ¿Qué puede capturar o dar jaque el rival?</span>
       <span class="badge">Checklist</span>
+    </div>
+
+    <div class="eval-bar review-only" id="evalBar" role="img" aria-label="Ventaja">
+      <div class="eval-fill" id="evalFill"></div>
+      <span id="evalText"></span>
     </div>
 
     <!-- Tablero interactivo -->
@@ -92,9 +98,29 @@
 
     <!-- Controles Repaso -->
     <div class="action-buttons" id="reviewControls" style="display: none;">
-      <button class="btn btn-secondary" id="btnBackReport">← Informe</button>
+      <button class="btn btn-secondary" id="btnBackReport">← Revisión</button>
       <button class="btn btn-primary" id="btnShowSolution">Ver jugada</button>
     </div>
+
+    <!-- Revisión sobre el tablero -->
+    <section class="review-panel review-only" id="reviewPanel">
+      <div class="coach" aria-live="polite">
+        <span id="rvBadge"></span>
+        <div><strong id="rvTitle"></strong><p id="rvText"></p></div>
+      </div>
+      <div class="rv-actions">
+        <button type="button" class="btn btn-secondary" id="btnShowBest">Ver mejor</button>
+        <button type="button" class="btn btn-secondary" id="btnRetry">Reintentar</button>
+      </div>
+      <div class="rv-strip" id="rvStrip"></div>
+      <div class="rv-graph" id="rvGraph" aria-label="Gráfica de ventaja: toca para saltar a una jugada"></div>
+      <div class="rv-nav">
+        <button type="button" class="btn btn-secondary" id="rvFirst" aria-label="Inicio">⏮</button>
+        <button type="button" class="btn btn-secondary" id="rvPrev" aria-label="Anterior">◀</button>
+        <button type="button" class="btn btn-primary" id="rvNext" aria-label="Siguiente">▶</button>
+        <button type="button" class="btn btn-secondary" id="rvLast" aria-label="Final">⏭</button>
+      </div>
+    </section>
 
     <!-- Controles Práctica -->
     <div class="action-buttons" id="practiceControls" style="display: none;">
@@ -102,6 +128,15 @@
       <button class="btn btn-success" id="btnContinuePractice" disabled>Continuar →</button>
     </div>
   </div>
+
+  <nav class="bottom-nav" aria-label="Secciones">
+    <div class="nav-modes" id="modeTabs">
+      <button class="tab-btn active" data-mode="learn"><span aria-hidden="true">📖</span>Aprender</button>
+      <button class="tab-btn" data-mode="practice"><span aria-hidden="true">🎯</span>Práctica</button>
+      <button class="tab-btn" data-mode="ai"><span aria-hidden="true">♟️</span>Vs IA</button>
+    </div>
+    <button type="button" class="nav-more" id="btnMenu" aria-haspopup="dialog"><span aria-hidden="true">☰</span>Más</button>
+  </nav>
 
   <!-- Modal del Checklist -->
   <div class="modal-overlay" id="checklistModal">
@@ -125,33 +160,48 @@
     </div>
   </div>
 
-  <!-- Menú: versión y cambios -->
-  <div class="modal-overlay" id="menuModal">
+  <!-- Pantalla Más: ajustes, progreso, versión y cambios -->
+  <div class="modal-overlay sheet" id="menuModal">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
-      <h3 id="menuTitle">Menú</h3>
-      <p class="menu-version">Versión instalada: <strong id="appVersion">?</strong></p>
-      <p class="menu-version" id="offlineStatus"></p>
-      <label class="menu-option"><input type="checkbox" id="soundToggle"> Sonidos</label>
-      <h4>Historial de cambios</h4>
-      <div id="changeLog"></div>
+      <div class="sheet-head">
+        <h3 id="menuTitle">Más</h3>
+        <button type="button" class="head-btn" id="btnCloseMenu">Cerrar</button>
+      </div>
+      <section class="sheet-card">
+        <h4>Ajustes</h4>
+        <label class="menu-option"><span>Sonidos</span><input type="checkbox" id="soundToggle"></label>
+        <label class="menu-option"><span>Tema claro</span><input type="checkbox" id="themeToggle"></label>
+      </section>
+      <section class="sheet-card">
+        <h4>Tu progreso en Práctica</h4>
+        <div id="progressList"></div>
+      </section>
+      <section class="sheet-card">
+        <h4>Aplicación</h4>
+        <p class="menu-version">Versión instalada: <strong id="appVersion">?</strong></p>
+        <p class="menu-version" id="offlineStatus"></p>
+        <button type="button" class="btn btn-secondary menu-action" id="btnReload">Recargar app</button>
+      </section>
+      <section class="sheet-card">
+        <h4>Historial de cambios</h4>
+        <div id="changeLog"></div>
+      </section>
       <p class="menu-credit">Análisis: Stockfish 19 mediante <a href="https://github.com/nmrugg/stockfish.js" target="_blank" rel="noopener">Stockfish.js</a>, licencia <a href="js/lib/stockfish/LICENSE.txt" target="_blank">GPL-3.0</a>.</p>
-      <button type="button" class="btn btn-secondary menu-action" id="btnReload">Recargar app</button>
-      <button type="button" class="btn btn-primary menu-action" id="btnCloseMenu">Cerrar</button>
     </div>
   </div>
 
-  <script src="js/lib/chess.min.js?v=4.1.0"></script>
-  <script src="js/pieces.js?v=4.1.0"></script>
-  <script src="js/data/italiana.js?v=4.1.0"></script>
-  <script src="js/data/carokann.js?v=4.1.0"></script>
-  <script src="js/arbol.js?v=4.1.0"></script>
-  <script src="js/motor.js?v=4.1.0"></script>
-  <script src="js/sonidos.js?v=4.1.0"></script>
-  <script src="js/version.js?v=4.1.0"></script>
-  <script src="js/menu.js?v=4.1.0"></script>
-  <script src="js/app.js?v=4.1.0"></script>
-  <script src="js/analisis.js?v=4.1.0"></script>
-  <script src="js/splash.js?v=4.1.0"></script>
-  <script src="js/offline.js?v=4.1.0"></script>
+  <script src="js/lib/chess.min.js?v=5.0.0"></script>
+  <script src="js/pieces.js?v=5.0.0"></script>
+  <script src="js/data/italiana.js?v=5.0.0"></script>
+  <script src="js/data/carokann.js?v=5.0.0"></script>
+  <script src="js/arbol.js?v=5.0.0"></script>
+  <script src="js/motor.js?v=5.0.0"></script>
+  <script src="js/sonidos.js?v=5.0.0"></script>
+  <script src="js/version.js?v=5.0.0"></script>
+  <script src="js/menu.js?v=5.0.0"></script>
+  <script src="js/app.js?v=5.0.0"></script>
+  <script src="js/analisis.js?v=5.0.0"></script>
+  <script src="js/splash.js?v=5.0.0"></script>
+  <script src="js/offline.js?v=5.0.0"></script>
 </body>
 </html>

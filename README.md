@@ -67,15 +67,15 @@ node tools/validar.js
 
 1. Añade una entrada al inicio de la lista en `js/version.js`.
 2. Cambia todos los `?v=` de `index.html` y `VERSION` en `sw.js` al mismo número, y ejecuta `node tools/validar.js`. Si creas un archivo nuevo, añádelo también a la lista de `sw.js`.
-3. Comprueba la versión en el menú **☰** de la app.
+3. Comprueba la versión en el menú **Más** de la app.
 
 ## Instalar en Android
 
-Abre la web en Chrome, toca **⋮ → Añadir a pantalla de inicio** (o **Instalar app**). Antes de usarla sin internet, ábrela una vez conectado y espera a que el menú **☰** diga «Sin conexión: lista ✓». Para probarlo en un computador usa un servidor local (`python3 -m http.server`); abriendo el archivo directo no se activa el service worker.
+Abre la web en Chrome, toca **⋮ → Añadir a pantalla de inicio** (o **Instalar app**). Antes de usarla sin internet, ábrela una vez conectado y espera a que el menú **Más** diga «Sin conexión: lista ✓». Para probarlo en un computador usa un servidor local (`python3 -m http.server`); abriendo el archivo directo no se activa el service worker.
 
 ## Análisis de partidas
 
-En **Vs IA**, el botón **Analizar** usa Stockfish en un Web Worker (solo desde un servidor web o la app instalada). La clasificación se basa en la caída estimada de opciones de ganar: menos de 2 puntos excelente, menos de 5 buena, menos de 10 imprecisión, menos de 20 error y desde 20 error grave. Son umbrales propios y aproximados.
+En **Vs IA**, el botón **Analizar** abre un resumen y la revisión sobre el tablero. El análisis usa Stockfish en un Web Worker (solo desde un servidor web o la app instalada). La clasificación se basa en la caída estimada de opciones de ganar: menos de 2 puntos excelente, menos de 5 buena, menos de 10 imprecisión, menos de 20 error y desde 20 error grave. Son umbrales propios y aproximados.
 
 ## Licencias de terceros
 

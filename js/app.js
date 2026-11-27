@@ -179,6 +179,7 @@ function resetSession() {
 
   const op = opening();
   const ai = currentMode === "ai";
+  $("screenTitle").textContent = { learn: "Aprender", practice: "Práctica", ai: "Jugar contra la IA" }[currentMode];
   $("openingTitle").textContent = ai ? "Partida contra la IA" : op.name;
   $("openingTabs").style.display = ai ? "none" : "";
   $("aiControls").style.display = ai ? "grid" : "none";

@@ -5,16 +5,23 @@
   const LIMITE = "go depth 15 movetime 500";
   const VALOR = { p: 100, n: 300, b: 300, r: 500, q: 900, k: 10000 };
   const TIPOS = {
-    libro:       { nombre: "De libro", icono: "📖" },
-    brillante:   { nombre: "Brillante", icono: "‼" },
+    libro:       { nombre: "De libro", icono: "▤" },
+    brillante:   { nombre: "Brillante", icono: "!!" },
+    genial:      { nombre: "Gran jugada", icono: "!" },
     mejor:       { nombre: "La mejor", icono: "★" },
-    excelente:   { nombre: "Excelente", icono: "✓" },
-    buena:       { nombre: "Buena", icono: "·" },
+    excelente:   { nombre: "Excelente", icono: "✓✓" },
+    buena:       { nombre: "Buena", icono: "✓" },
     imprecision: { nombre: "Imprecisión", icono: "?!" },
     error:       { nombre: "Error", icono: "?" },
     grave:       { nombre: "Error grave", icono: "??" }
   };
   const FALLOS = ["imprecision", "error", "grave"];
+  const DESTACADAS = ["brillante", "genial", "imprecision", "error", "grave"];
+  const FRASE = {
+    libro: "es de libro", brillante: "es brillante", genial: "es una gran jugada", mejor: "es la mejor",
+    excelente: "es excelente", buena: "es buena", imprecision: "es una imprecisión",
+    error: "es un error", grave: "es un error grave"
+  };
   const es = san => window.EA.aEspanol(san);
 
   const modal = $("analysisModal"), cuerpo = $("analysisBody");
@@ -46,17 +53,20 @@
     cerrarMotor();
     worker = new Worker(MOTOR);
     await esperar(["uci"], "uciok");
-    await esperar(["ucinewgame", "isready"], "readyok");
+    await esperar(["setoption name MultiPV value 2", "ucinewgame", "isready"], "readyok");
   }
 
   // Puntuación desde el punto de vista de quien mueve
   async function evaluar(fen) {
-    let nota = null;
+    const notas = [null, null];
     const fin = await esperar([`position fen ${fen}`, LIMITE], "bestmove", linea => {
       const m = linea.match(/ score (cp|mate) (-?\d+)/);
-      if (m && !/(lowerbound|upperbound)/.test(linea)) nota = { tipo: m[1], valor: Number(m[2]) };
+      const pv = linea.match(/ multipv (\d+) /);
+      if (m && !/(lowerbound|upperbound)/.test(linea)) {
+        notas[pv ? Number(pv[1]) - 1 : 0] = { tipo: m[1], valor: Number(m[2]) };
+      }
     });
-    return { nota: nota || { tipo: "cp", valor: 0 }, mejor: fin.split(" ")[1] };
+    return { nota: notas[0] || { tipo: "cp", valor: 0 }, segunda: notas[1], mejor: fin.split(" ")[1] };
   }
 
   /* ---------- Clasificación ---------- */
@@ -82,6 +92,7 @@
     if (d.libro) return "libro";
     const perdida = d.esMejor || d.unica ? 0 : Math.max(0, d.antes - d.despues);
     if (perdida < 2 && !d.unica && d.sacrificio && d.despues >= 50 && d.antes <= 95) return "brillante";
+    if (d.esMejor && !d.unica && d.destaca && d.despues >= 40 && d.antes <= 95) return "genial";
     if (d.esMejor || d.unica) return "mejor";
     if (perdida < 2) return "excelente";
     if (perdida < 5) return "buena";
@@ -139,17 +150,31 @@
       const sacrificio = "nbrq".includes(m.piece) &&
         intercambio(new Chess(posiciones[i + 1]), m.to) - capturado >= 200;
       const esMejor = darMate || uciDe(m) === evals[i].mejor;
-      const tipo = clasificar({ libro: enLibro, esMejor, unica: antesPos.moves().length === 1, antes, despues, sacrificio });
+      // "Gran jugada": claramente mejor que la segunda opción y no es una captura obvia
+      const anterior = jugadas[i - 1];
+      const obvia = (anterior && m.captured && anterior.to === m.to) || capturado >= VALOR[m.piece];
+      const destaca = !obvia && !!evals[i].segunda && antes - opciones(evals[i].segunda) >= 15;
+      const tipo = clasificar({ libro: enLibro, esMejor, unica: antesPos.moves().length === 1, antes, despues, sacrificio, destaca });
       const nota = evals[i].nota;
       return {
-        indice: i, color: m.color, san: m.san, tipo,
+        indice: i, color: m.color, san: m.san, tipo, uci: uciDe(m),
         fen: posiciones[i], mejorUci: evals[i].mejor,
         mejorSan: sanDe(posiciones[i], evals[i].mejor),
         respuestaSan: sanDe(posiciones[i + 1], evals[i + 1].mejor),
         mateEnMano: !enLibro && !esMejor && nota.tipo === "mate" && nota.valor > 0 ? nota.valor : 0
       };
     });
-    return { sans, color, jugadas: lista };
+    // Ventaja de las blancas en cada posición, para la barra y la gráfica
+    const curva = evals.map((e, i) => {
+      const blancas = posiciones[i].split(" ")[1] === "w";
+      if (estados[i] === "mate") return { pct: blancas ? 0 : 100, texto: blancas ? "0-1" : "1-0" };
+      const pct = blancas ? opciones(e.nota) : 100 - opciones(e.nota);
+      const v = blancas ? e.nota.valor : -e.nota.valor;
+      const texto = e.nota.tipo === "mate" ? `${v < 0 ? "-" : ""}M${Math.abs(v)}`
+        : `${v > 0 ? "+" : ""}${(v / 100).toFixed(1)}`;
+      return { pct, texto };
+    });
+    return { sans, color, jugadas: lista, curva };
   }
 
   /* ---------- Informe ---------- */
@@ -176,55 +201,199 @@
     return texto[0].toUpperCase() + texto.slice(1);
   }
 
-  function filaFallo(j) {
-    const caja = crear("div", null, `an-move an-${j.tipo}`);
-    caja.append(crear("strong", `${numero(j)} ${es(j.san)} ${TIPOS[j.tipo].icono} ${TIPOS[j.tipo].nombre}`));
-    caja.append(crear("p", `Stockfish proponía: ${j.mejorSan ? es(j.mejorSan) : "—"}.`));
-    if (j.mateEnMano) caja.append(crear("p", `Tenías mate en ${j.mateEnMano}.`));
-    if (j.respuestaSan) caja.append(crear("p", `Tras tu jugada, la mejor respuesta rival era ${es(j.respuestaSan)}.`));
-    const boton = crear("button", "Practicar esta posición", "btn btn-secondary an-practice");
-    boton.type = "button";
-    boton.addEventListener("click", () => practicar(j));
-    caja.append(boton);
-    return caja;
+  function marca(tipo, clase = "") {
+    const el = crear("span", TIPOS[tipo].icono, `mk mk-${tipo} ${clase}`);
+    el.title = TIPOS[tipo].nombre;
+    el.setAttribute("aria-label", TIPOS[tipo].nombre);
+    return el;
   }
 
+  // Resumen: se toca una categoría para verla en el tablero
   function mostrarInforme() {
     cuerpo.innerHTML = "";
     const mias = informe.jugadas.filter(j => j.color === informe.color);
     const suyas = informe.jugadas.filter(j => j.color !== informe.color);
+    cuerpo.append(crear("p", consejo(mias.filter(j => FALLOS.includes(j.tipo))), "an-tip"));
 
     const tabla = crear("table", null, "an-table");
     const cabecera = tabla.insertRow();
-    ["Tipo", "Tú", "IA"].forEach(t => cabecera.append(crear("th", t)));
+    ["Jugada", "Tú", "IA"].forEach(t => cabecera.append(crear("th", t)));
     Object.entries(TIPOS).forEach(([clave, t]) => {
       const fila = tabla.insertRow();
       fila.dataset.tipo = clave;
-      fila.append(crear("td", `${t.icono} ${t.nombre}`),
-        crear("td", String(mias.filter(j => j.tipo === clave).length)),
-        crear("td", String(suyas.filter(j => j.tipo === clave).length)));
+      const celda = crear("td");
+      celda.append(marca(clave), crear("span", t.nombre));
+      fila.append(celda);
+      [mias, suyas].forEach(lista => {
+        const encontradas = lista.filter(j => j.tipo === clave);
+        const td = crear("td");
+        const boton = crear("button", String(encontradas.length), "an-count");
+        boton.type = "button";
+        boton.disabled = !encontradas.length;
+        boton.setAttribute("aria-label", `Ver ${t.nombre}: ${encontradas.length}`);
+        if (encontradas.length) boton.addEventListener("click", () => abrirRevision(encontradas[0].indice + 1));
+        td.append(boton);
+        fila.append(td);
+      });
     });
     cuerpo.append(tabla);
 
-    const orden = { grave: 0, error: 1, imprecision: 2 };
-    const fallos = mias.filter(j => FALLOS.includes(j.tipo))
-      .sort((a, b) => orden[a.tipo] - orden[b.tipo] || a.indice - b.indice);
-    cuerpo.append(crear("h4", "Para mejorar"), crear("p", consejo(fallos), "an-tip"));
-    fallos.forEach(j => cuerpo.append(filaFallo(j)));
-
-    const todas = crear("details");
-    todas.append(crear("summary", "Todas las jugadas"));
-    informe.jugadas.forEach(j => todas.append(crear("p",
-      `${numero(j)} ${es(j.san)} ${TIPOS[j.tipo].icono} ${TIPOS[j.tipo].nombre}${j.color === informe.color ? " (tú)" : ""}`)));
-    cuerpo.append(todas);
-    cuerpo.append(crear("p", "Análisis rápido con Stockfish 19 lite: las categorías son aproximadas y no coinciden necesariamente con Chess.com. «De libro» se refiere solo a las líneas de esta app. «Brillante» se estima cuando una de las mejores jugadas parece sacrificar material.", "an-note"));
+    const revisar = crear("button", "Revisar en el tablero", "btn btn-success an-start");
+    revisar.type = "button";
+    revisar.id = "btnStartReview";
+    revisar.addEventListener("click", () => abrirRevision(primerPunto()));
+    cuerpo.append(revisar);
+    cuerpo.append(crear("p", "Análisis rápido con Stockfish 19 lite: las categorías son aproximadas y no coinciden necesariamente con Chess.com. «De libro» se refiere solo a las líneas de esta app.", "an-note"));
     $("btnCloseAnalysis").textContent = "Cerrar";
     modal.classList.add("open");
   }
 
+  /* ---------- Revisión sobre el tablero ---------- */
+  let rv = null;   // { ply, verMejor }
+
+  // La revisión empieza en tu primer fallo
+  function primerPunto() {
+    const j = informe.jugadas.find(x => x.color === informe.color && FALLOS.includes(x.tipo));
+    return j ? j.indice + 1 : Math.min(1, informe.sans.length);
+  }
+
+  function abrirRevision(ply) {
+    modal.classList.remove("open");
+    if (repaso) volverAlFinal();
+    document.body.classList.add("reviewing");
+    $("screenTitle").textContent = "Revisión";
+    construirTira();
+    irA(ply);
+    window.scrollTo(0, 0);
+  }
+
+  function cerrarRevision() {
+    if (!document.body.classList.contains("reviewing")) return;
+    document.body.classList.remove("reviewing");
+    $("screenTitle").textContent = "Jugar contra la IA";
+    $("boardWrapper").querySelector(".rv-arrows")?.remove();
+  }
+
+  function construirTira() {
+    const tira = $("rvStrip");
+    tira.innerHTML = "";
+    informe.jugadas.forEach(j => {
+      const b = crear("button", null, "rv-chip");
+      b.type = "button";
+      b.append(marca(j.tipo, "mk-small"), crear("span", `${numero(j)} ${es(j.san)}`));
+      b.addEventListener("click", () => irA(j.indice + 1));
+      tira.append(b);
+    });
+  }
+
+  // Flechas sobre el tablero (coordenadas de 0 a 8)
+  function flechas(lista) {
+    $("boardWrapper").querySelector(".rv-arrows")?.remove();
+    if (!lista.length) return;
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 8 8");
+    svg.setAttribute("class", "rv-arrows");
+    const punto = casilla => {
+      let x = casilla.charCodeAt(0) - 97, y = 8 - Number(casilla[1]);
+      if (informe.color === "b") { x = 7 - x; y = 7 - y; }
+      return [x + 0.5, y + 0.5];
+    };
+    lista.forEach(({ uci, color }) => {
+      const [x1, y1] = punto(uci.slice(0, 2)), [x2, y2] = punto(uci.slice(2, 4));
+      const largo = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / largo, uy = (y2 - y1) / largo;
+      const bx = x2 - ux * 0.42, by = y2 - uy * 0.42;
+      const forma = document.createElementNS(NS, "path");
+      forma.setAttribute("d", [
+        `M${x1 - uy * 0.09},${y1 + ux * 0.09}`, `L${bx - uy * 0.09},${by + ux * 0.09}`,
+        `L${bx - uy * 0.25},${by + ux * 0.25}`, `L${x2},${y2}`,
+        `L${bx + uy * 0.25},${by - ux * 0.25}`, `L${bx + uy * 0.09},${by - ux * 0.09}`,
+        `L${x1 + uy * 0.09},${y1 - ux * 0.09}`, "Z"].join(" "));
+      forma.setAttribute("class", `arrow-${color}`);
+      svg.appendChild(forma);
+    });
+    $("boardWrapper").appendChild(svg);
+  }
+
+  function explicacion(j) {
+    const partes = [];
+    if (j.tipo === "libro") partes.push("Coincide con una línea de tu libro de aperturas.");
+    if (j.tipo === "brillante") partes.push("Parece entregar material y aun así mantiene una buena posición.");
+    if (j.tipo === "genial") partes.push("Claramente mejor que la segunda opción que encontró Stockfish.");
+    if (j.tipo === "mejor") partes.push("Es la que propone Stockfish o la única posible.");
+    if (FALLOS.includes(j.tipo) || j.tipo === "buena" || j.tipo === "excelente") {
+      if (j.mejorSan && j.mejorSan !== j.san) partes.push(`Stockfish prefería ${es(j.mejorSan)}.`);
+    }
+    if (j.mateEnMano) partes.push(`Había mate en ${j.mateEnMano}.`);
+    if (FALLOS.includes(j.tipo) && j.respuestaSan) partes.push(`La mejor respuesta era ${es(j.respuestaSan)}.`);
+    return partes.join(" ");
+  }
+
+  function irA(ply, verMejor = false) {
+    const total = informe.sans.length;
+    ply = Math.max(0, Math.min(total, ply));
+    const j = ply ? informe.jugadas[ply - 1] : null;
+    rv = { ply, verMejor: !!(verMejor && j) };
+
+    cargarHasta(rv.verMejor ? ply - 1 : ply);
+    isLocked = true;
+    if (rv.verMejor) {
+      lastMove = [];
+      updateHighlights();
+      const lista = [{ uci: j.mejorUci, color: "best" }];
+      if (j.uci !== j.mejorUci) lista.unshift({ uci: j.uci, color: "played" });
+      flechas(lista);
+    } else {
+      flechas([]);
+      if (j) {
+        [j.uci.slice(0, 2), j.uci.slice(2, 4)].forEach(c => squareEl(c).classList.add("rv-tint", `tint-${j.tipo}`));
+        squareEl(j.uci.slice(2, 4)).appendChild(marca(j.tipo, "mk-board"));
+      }
+    }
+
+    $("rvBadge").innerHTML = "";
+    if (j) $("rvBadge").appendChild(marca(j.tipo, "mk-big"));
+    $("rvTitle").textContent = !j ? "Inicio de la partida"
+      : rv.verMejor ? `Mejor: ${es(j.mejorSan)}`
+      : `${numero(j)} ${es(j.san)} ${FRASE[j.tipo]}`;
+    $("rvText").textContent = !j ? "Toca ▶ para recorrer la partida."
+      : rv.verMejor ? (j.uci === j.mejorUci ? "Flecha verde: la jugada propuesta." : "Verde: la propuesta. Roja: lo que se jugó.")
+      : `${j.color === informe.color ? "Tu jugada." : "Jugada de la IA."} ${explicacion(j)}`;
+
+    const pos = informe.curva[rv.verMejor ? ply - 1 : ply];
+    $("evalFill").style.width = pos.pct + "%";
+    $("evalText").textContent = pos.texto;
+    $("evalBar").setAttribute("aria-label", `Ventaja (positiva para las blancas): ${pos.texto}`);
+
+    $("rvFirst").disabled = $("rvPrev").disabled = ply === 0;
+    $("rvNext").disabled = $("rvLast").disabled = ply === total;
+    $("btnShowBest").disabled = !j || !j.mejorUci;
+    $("btnShowBest").textContent = rv.verMejor ? "Ver jugada hecha" : "Ver mejor";
+    $("btnRetry").disabled = !j || j.color !== informe.color || !FALLOS.includes(j.tipo) || !j.mejorUci;
+
+    const tira = $("rvStrip");
+    [...tira.children].forEach((c, i) => c.classList.toggle("current", i === ply - 1));
+    const actual = tira.children[ply - 1];
+    tira.scrollLeft = actual ? actual.offsetLeft - tira.offsetLeft - tira.clientWidth / 2 + actual.offsetWidth / 2 : 0;
+    grafica();
+  }
+
+  function grafica() {
+    const n = Math.max(1, informe.curva.length - 1);
+    const caja = $("rvGraph");
+    const puntos = informe.curva.map((p, i) => `${(i / n) * 100},${40 - p.pct * 0.4}`).join(" ");
+    caja.innerHTML = `<svg viewBox="0 0 100 40" preserveAspectRatio="none"><polygon points="0,40 ${puntos} 100,40"/><line x1="0" x2="100" y1="20" y2="20"/><line class="cursor" x1="${(rv.ply / n) * 100}" x2="${(rv.ply / n) * 100}" y1="0" y2="40"/></svg>`;
+    informe.jugadas.filter(j => DESTACADAS.includes(j.tipo)).forEach(j => {
+      const punto = crear("i", null, `dot mk-${j.tipo}`);
+      punto.style.left = `${((j.indice + 1) / n) * 100}%`;
+      punto.style.top = `${100 - informe.curva[j.indice + 1].pct}%`;
+      caja.appendChild(punto);
+    });
+  }
+
   /* ---------- Flujo ---------- */
   async function pedirAnalisis() {
-    if (informe) return mostrarInforme();
+    if (informe) return abrirRevision(rv ? rv.ply : primerPunto());
     if (!game.game_over() && !confirm("¿Terminar esta partida y analizarla?")) return;
 
     // Detiene la IA: a partir de aquí la partida está terminada
@@ -283,6 +452,7 @@
     timers.forEach(clearTimeout);
     timers.clear();
     modal.classList.remove("open");
+    cerrarRevision();
     repaso = { jugada: j, fallos: 0, resuelta: false };
     cargarHasta(j.indice);
     isLocked = false;
@@ -334,22 +504,40 @@
     $("reviewControls").style.display = "none";
     $("aiControls").style.display = "grid";
     $("stepCounter").textContent = "Terminada";
-    setCard("Partida analizada", "Toca «Analizar» para volver al informe o empieza una partida nueva.");
+    setCard("Partida analizada", "Toca «Analizar» para volver a la revisión o empieza una partida nueva.");
     updateUndo();
   }
 
   function reiniciar() {
     tarea++;
     cerrarMotor();
+    cerrarRevision();
     informe = null;
     repaso = null;
+    rv = null;
     modal.classList.remove("open");
     $("reviewControls").style.display = "none";
   }
 
   $("btnAnalyze").addEventListener("click", pedirAnalisis);
   $("btnShowSolution").addEventListener("click", verSolucion);
-  $("btnBackReport").addEventListener("click", () => { volverAlFinal(); mostrarInforme(); });
+  $("btnBackReport").addEventListener("click", () => {
+    const ply = repaso.jugada.indice + 1;
+    volverAlFinal();
+    abrirRevision(ply);
+  });
+  $("btnExitReview").addEventListener("click", () => { cerrarRevision(); volverAlFinal(); });
+  $("btnSummary").addEventListener("click", mostrarInforme);
+  $("rvFirst").addEventListener("click", () => irA(0));
+  $("rvPrev").addEventListener("click", () => irA(rv.ply - 1));
+  $("rvNext").addEventListener("click", () => irA(rv.ply + 1));
+  $("rvLast").addEventListener("click", () => irA(informe.sans.length));
+  $("btnShowBest").addEventListener("click", () => irA(rv.ply, !rv.verMejor));
+  $("btnRetry").addEventListener("click", () => practicar(informe.jugadas[rv.ply - 1]));
+  $("rvGraph").addEventListener("click", e => {
+    const r = $("rvGraph").getBoundingClientRect();
+    irA(Math.round((e.clientX - r.left) / r.width * informe.sans.length));
+  });
   $("btnCloseAnalysis").addEventListener("click", () => {
     if (!informe) { tarea++; cerrarMotor(); }
     modal.classList.remove("open");
