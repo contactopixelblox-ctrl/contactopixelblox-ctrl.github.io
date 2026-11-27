@@ -4,6 +4,9 @@ App web para aprender la **Apertura Italiana** (con blancas) y la **Defensa Caro
 
 Publicada en: https://contactopixelblox-ctrl.github.io/
 
+## Analizar una partida PGN
+Toca **PGN** en la barra inferior, pega el texto (o abre un archivo `.pgn`), elige tu color y toca **Analizar partida**. Si el archivo trae varias partidas, se elige una. Se ignoran comentarios, relojes y variantes entre paréntesis. Solo partidas desde la posición inicial. La app recuerda tu nombre de jugador en el teléfono para marcar tu color la próxima vez. El lector está en `js/pgn.js`.
+
 ## Estructura
 
 | Archivo | Contenido |

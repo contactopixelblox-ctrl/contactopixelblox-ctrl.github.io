@@ -77,7 +77,8 @@ const AI_OPTIONS = [];
   [["facil", "Fácil"], ["medio", "Medio"], ["dificil", "Difícil"]].forEach(([nivel, n]) =>
     AI_OPTIONS.push({ id: `${color}:${nivel}`, name: `${texto} · ${n}` })));
 const aiLevel = () => selectedVariantId.split(":")[1];
-const userColor = () => currentMode === "ai" ? selectedVariantId.split(":")[0] : opening().userColor;
+let colorImportado = null;   // color del tablero al revisar una partida PGN
+const userColor = () => colorImportado || (currentMode === "ai" ? selectedVariantId.split(":")[0] : opening().userColor);
 
 function populateVariantSelector() {
   variantSelect.innerHTML = "";
@@ -412,7 +413,7 @@ function handleUserMove(from, to) {
   const attempt = new Chess(game.fen()).move({ from, to, promotion: "q" });
   if (!attempt) return shake(from);
 
-  if (currentMode === "ai" && window.EA.analisis.intento(from, to)) return;
+  if (window.EA.analisis.intento(from, to)) return;
   if (currentMode === "ai") return executeMove({ from, to, promotion: "q" }, () => aiTurn());
   if (freeMoves !== null) return freeUserMove(from, to);
 

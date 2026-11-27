@@ -29,6 +29,7 @@
   let tarea = 0;          // cambia al cancelar: descarta resultados viejos
   let informe = null;
   let repaso = null;
+  let importada = false;  // se está revisando una partida PGN
 
   /* ---------- Comunicación con Stockfish (protocolo UCI) ---------- */
   function cerrarMotor() {
@@ -217,7 +218,7 @@
 
     const tabla = crear("table", null, "an-table");
     const cabecera = tabla.insertRow();
-    ["Jugada", "Tú", "IA"].forEach(t => cabecera.append(crear("th", t)));
+    ["Jugada", "Tú", informe.importada ? "Rival" : "IA"].forEach(t => cabecera.append(crear("th", t)));
     Object.entries(TIPOS).forEach(([clave, t]) => {
       const fila = tabla.insertRow();
       fila.dataset.tipo = clave;
@@ -270,7 +271,7 @@
   function cerrarRevision() {
     if (!document.body.classList.contains("reviewing")) return;
     document.body.classList.remove("reviewing");
-    $("screenTitle").textContent = "Jugar contra la IA";
+    $("screenTitle").textContent = informe && informe.importada ? "Partida PGN" : "Jugar contra la IA";
     $("boardWrapper").querySelector(".rv-arrows")?.remove();
   }
 
@@ -358,7 +359,7 @@
       : `${numero(j)} ${es(j.san)} ${FRASE[j.tipo]}`;
     $("rvText").textContent = !j ? "Toca ▶ para recorrer la partida."
       : rv.verMejor ? (j.uci === j.mejorUci ? "Flecha verde: la jugada propuesta." : "Verde: la propuesta. Roja: lo que se jugó.")
-      : `${j.color === informe.color ? "Tu jugada." : "Jugada de la IA."} ${explicacion(j)}`;
+      : `${j.color === informe.color ? "Tu jugada." : informe.importada ? "Jugada del rival." : "Jugada de la IA."} ${explicacion(j)}`;
 
     const pos = informe.curva[rv.verMejor ? ply - 1 : ply];
     $("evalFill").style.width = pos.pct + "%";
@@ -392,47 +393,79 @@
   }
 
   /* ---------- Flujo ---------- */
-  async function pedirAnalisis() {
-    if (informe) return abrirRevision(rv ? rv.ply : primerPunto());
-    if (!game.game_over() && !confirm("¿Terminar esta partida y analizarla?")) return;
-
-    // Detiene la IA: a partir de aquí la partida está terminada
+  // Detiene la partida en curso y bloquea el tablero
+  function detener() {
     session++;
     timers.forEach(clearTimeout);
     timers.clear();
     clearSelection();
+    clearHint();
     renderBoard();
     isLocked = true;
     gameClosed = true;
+  }
+
+  async function pedirAnalisis() {
+    if (informe) return abrirRevision(rv ? rv.ply : primerPunto());
+    if (!game.game_over() && !confirm("¿Terminar esta partida y analizarla?")) return;
+
+    // A partir de aquí la partida está terminada
+    detener();
     updateUndo();
     $("stepCounter").textContent = "Terminada";
     setCard("Partida terminada", "Toca «Analizar» para ver el informe.");
+    await ejecutar(game.history(), userColor(), false);
+  }
 
+  // Revisa una partida leída de un PGN
+  async function importar(sans, color) {
+    resetSession();
+    detener();
+    importada = true;
+    document.body.classList.add("importada");
+    colorImportado = color;
+    sans.forEach(san => game.move(san));
+    lastMove = [];
+    renderBoard();
+    $("screenTitle").textContent = "Partida PGN";
+    $("openingTitle").textContent = "Partida PGN";
+    $("stepCounter").textContent = "";
+    setCard("Analizando tu partida", "Espera a que termine Stockfish.");
+    await ejecutar(sans, color, true);
+  }
+
+  // Sale de la partida PGN y vuelve a la sección en la que estabas
+  function salirImportada() {
+    if (importada) resetSession();
+  }
+
+  async function ejecutar(sans, color, esPgn) {
     const id = ++tarea;
-    const sans = game.history();
     cuerpo.innerHTML = "";
     const estado = crear("p", "Cargando Stockfish…");
     const barra = crear("progress");
     barra.max = 100;
     barra.value = 0;
     cuerpo.append(estado, barra);
+    if (sans.length > 60) cuerpo.append(crear("p", "Es una partida larga: puede tardar uno o dos minutos. No cierres la app.", "an-note"));
     $("btnCloseAnalysis").textContent = "Cancelar";
     modal.classList.add("open");
 
     try {
       if (location.protocol === "file:") throw new Error("El análisis solo funciona desde el enlace web, no abriendo el archivo");
-      const resultado = await analizar(sans, userColor(), (i, n) => {
+      const resultado = await analizar(sans, color, (i, n) => {
         estado.textContent = `Analizando posición ${i + 1} de ${n}…`;
         barra.value = Math.round((i / n) * 100);
       });
       if (!resultado || id !== tarea) return;
+      resultado.importada = esPgn;
       informe = resultado;
       mostrarInforme();
     } catch (e) {
       if (id !== tarea) return;
       cerrarMotor();
       cuerpo.innerHTML = "";
-      cuerpo.append(crear("p", `No se pudo analizar. ${e.message}. Cierra y vuelve a tocar «Analizar».`, "feedback-error"));
+      cuerpo.append(crear("p", `No se pudo analizar. ${e.message}. Cierra y vuelve a intentarlo.`, "feedback-error"));
       $("btnCloseAnalysis").textContent = "Cerrar";
     }
   }
@@ -502,6 +535,7 @@
     cargarHasta(informe.sans.length);
     isLocked = true;
     $("reviewControls").style.display = "none";
+    if (importada) return;
     $("aiControls").style.display = "grid";
     $("stepCounter").textContent = "Terminada";
     setCard("Partida analizada", "Toca «Analizar» para volver a la revisión o empieza una partida nueva.");
@@ -515,6 +549,9 @@
     informe = null;
     repaso = null;
     rv = null;
+    importada = false;
+    colorImportado = null;
+    document.body.classList.remove("importada");
     modal.classList.remove("open");
     $("reviewControls").style.display = "none";
   }
@@ -526,7 +563,11 @@
     volverAlFinal();
     abrirRevision(ply);
   });
-  $("btnExitReview").addEventListener("click", () => { cerrarRevision(); volverAlFinal(); });
+  $("btnExitReview").addEventListener("click", () => {
+    if (importada) return salirImportada();
+    cerrarRevision();
+    volverAlFinal();
+  });
   $("btnSummary").addEventListener("click", mostrarInforme);
   $("rvFirst").addEventListener("click", () => irA(0));
   $("rvPrev").addEventListener("click", () => irA(rv.ply - 1));
@@ -541,7 +582,8 @@
   $("btnCloseAnalysis").addEventListener("click", () => {
     if (!informe) { tarea++; cerrarMotor(); }
     modal.classList.remove("open");
+    if (!document.body.classList.contains("reviewing")) salirImportada();
   });
 
-  window.EA.analisis = { reiniciar, intento, clasificar, analizar };
+  window.EA.analisis = { reiniciar, intento, importar, clasificar, analizar };
 })();

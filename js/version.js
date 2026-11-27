@@ -3,6 +3,9 @@
 window.EA = window.EA || { aperturas: {} };
 
 window.EA.historial = [
+  { version: "5.1.0", fecha: "27/11/2026", cambios: [
+    "Lector de PGN: pega o abre tus partidas y revísalas sobre el tablero."
+  ] },
   { version: "5.0.0", fecha: "27/11/2026", cambios: [
     "Diseño nuevo con tema oscuro (o claro) y navegación abajo.",
     "Revisión sobre el tablero con un símbolo de color en cada jugada.",

@@ -132,6 +132,15 @@ body:not(.reviewing) .review-only { display: none; }
 .menu-credit { font-size: 0.76rem; color: var(--text-muted); }
 .menu-credit a { color: var(--primary); }
 
+/* Lector de PGN */
+.pgn-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.pgn-buttons .btn { min-height: 44px; font-size: 0.88rem; min-width: 0; overflow-wrap: anywhere; text-align: center; }
+#pgnText { width: 100%; resize: vertical; padding: 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--bg-color); color: var(--text-main); font-family: ui-monospace, monospace; font-size: 16px; }
+#pgnGame { width: 100%; margin-top: 8px; }
+.pgn-msg { margin: 8px 0; font-size: 0.88rem; }
+.pgn-color[aria-pressed="true"] { background: var(--primary); color: #fff; }
+body.importada :is(.controls-top, .variant-row, .checklist-bar, .auto-row, #learnControls, #practiceControls, #aiControls) { display: none !important; }
+
 /* ===== Símbolos de jugada ===== */
 .mk { --c: #64748b; display: inline-grid; place-items: center; flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--c); color: #fff; font-size: 0.72rem; font-weight: 900; font-style: normal; letter-spacing: -0.5px; line-height: 1; }
 .mk-brillante { --c: #0fb5ae; }

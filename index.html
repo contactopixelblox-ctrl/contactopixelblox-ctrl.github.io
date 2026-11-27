@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/style.css?v=5.0.0">
+  <link rel="stylesheet" href="css/style.css?v=5.1.0">
 </head>
 <body>
 
@@ -135,6 +135,7 @@
       <button class="tab-btn" data-mode="practice"><span aria-hidden="true">🎯</span>Práctica</button>
       <button class="tab-btn" data-mode="ai"><span aria-hidden="true">♟️</span>Vs IA</button>
     </div>
+    <button type="button" id="btnPgn" aria-haspopup="dialog"><span aria-hidden="true">🔍</span>PGN</button>
     <button type="button" class="nav-more" id="btnMenu" aria-haspopup="dialog"><span aria-hidden="true">☰</span>Más</button>
   </nav>
 
@@ -157,6 +158,34 @@
       <h3 id="analysisTitle">Análisis de la partida</h3>
       <div id="analysisBody"></div>
       <button type="button" class="btn btn-primary" id="btnCloseAnalysis">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Lector de PGN -->
+  <div class="modal-overlay sheet" id="pgnModal">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="pgnTitle">
+      <div class="sheet-head">
+        <h3 id="pgnTitle">Analizar mi partida</h3>
+        <button type="button" class="head-btn" id="btnPgnClose">Cerrar</button>
+      </div>
+      <section class="sheet-card">
+        <p class="menu-version">Copia el PGN de tu partida (en Chess.com o Lichess) y pégalo aquí.</p>
+        <div class="pgn-buttons">
+          <button type="button" class="btn btn-secondary" id="btnPgnPaste">Pegar</button>
+          <label class="btn btn-secondary">Abrir archivo<input type="file" id="pgnFile" accept=".pgn,.txt,application/x-chess-pgn,text/plain" hidden></label>
+        </div>
+        <textarea id="pgnText" rows="7" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Texto PGN" placeholder="1. e4 e5 2. Nf3 Nc6 3. Bc4 …"></textarea>
+        <select class="variant-select" id="pgnGame" aria-label="Partida" hidden></select>
+        <p class="pgn-msg" id="pgnMsg" aria-live="polite"></p>
+        <div id="pgnChoice" hidden>
+          <h4>¿Con qué color jugaste?</h4>
+          <div class="pgn-buttons">
+            <button type="button" class="btn btn-secondary pgn-color" id="pgnWhite"></button>
+            <button type="button" class="btn btn-secondary pgn-color" id="pgnBlack"></button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-success menu-action" id="btnPgnAnalyze" disabled>Analizar partida</button>
+      </section>
     </div>
   </div>
 
@@ -190,18 +219,19 @@
     </div>
   </div>
 
-  <script src="js/lib/chess.min.js?v=5.0.0"></script>
-  <script src="js/pieces.js?v=5.0.0"></script>
-  <script src="js/data/italiana.js?v=5.0.0"></script>
-  <script src="js/data/carokann.js?v=5.0.0"></script>
-  <script src="js/arbol.js?v=5.0.0"></script>
-  <script src="js/motor.js?v=5.0.0"></script>
-  <script src="js/sonidos.js?v=5.0.0"></script>
-  <script src="js/version.js?v=5.0.0"></script>
-  <script src="js/menu.js?v=5.0.0"></script>
-  <script src="js/app.js?v=5.0.0"></script>
-  <script src="js/analisis.js?v=5.0.0"></script>
-  <script src="js/splash.js?v=5.0.0"></script>
-  <script src="js/offline.js?v=5.0.0"></script>
+  <script src="js/lib/chess.min.js?v=5.1.0"></script>
+  <script src="js/pieces.js?v=5.1.0"></script>
+  <script src="js/data/italiana.js?v=5.1.0"></script>
+  <script src="js/data/carokann.js?v=5.1.0"></script>
+  <script src="js/arbol.js?v=5.1.0"></script>
+  <script src="js/motor.js?v=5.1.0"></script>
+  <script src="js/sonidos.js?v=5.1.0"></script>
+  <script src="js/version.js?v=5.1.0"></script>
+  <script src="js/menu.js?v=5.1.0"></script>
+  <script src="js/app.js?v=5.1.0"></script>
+  <script src="js/analisis.js?v=5.1.0"></script>
+  <script src="js/pgn.js?v=5.1.0"></script>
+  <script src="js/splash.js?v=5.1.0"></script>
+  <script src="js/offline.js?v=5.1.0"></script>
 </body>
 </html>
