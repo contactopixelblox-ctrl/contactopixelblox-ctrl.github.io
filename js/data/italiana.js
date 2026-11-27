@@ -5,6 +5,16 @@ window.EA = window.EA || { aperturas: {} };
 window.EA.aperturas.italiana = {
   nombre: "Apertura Italiana",
   color: "w",
+  // Jugadas razonables del rival fuera del libro (se juegan a veces en Práctica)
+  desvios: [
+    { tras: ["e4"], san: "c5" },
+    { tras: ["e4"], san: "e6" },
+    { tras: ["e4", "e5", "Nf3"], san: "d6" },
+    { tras: ["e4", "e5", "Nf3", "Nc6", "Bc4"], san: "d6" },
+    { tras: ["e4", "e5", "Nf3", "Nc6", "Bc4"], san: "h6" },
+    { tras: ["e4", "e5", "Nf3", "Nc6", "Bc4"], san: "Nd4" },
+    { tras: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "c3"], san: "Qe7" }
+  ],
   variantes: [
     {
       id: "giuoco",
@@ -25,14 +35,14 @@ window.EA.aperturas.italiana = {
     },
     {
       id: "twoknights",
-      nombre: "Dos Caballos (3...Cf6)",
+      nombre: "Italiana tranquila vs 3...Cf6",
       jugadas: [
         { san: "e4", razon: "Controla el centro (d5 y f5) y abre paso a tu dama y alfil de casillas claras." },
         { san: "e5", razon: "El rival ocupa el centro y frena el avance de tu peón." },
         { san: "Nf3", razon: "Desarrolla el caballo hacia el centro y ataca de inmediato el peón de e5." },
         { san: "Nc6", razon: "El rival desarrolla su caballo para defender su peón central de e5." },
         { san: "Bc4", razon: "Desarrolla el alfil a una diagonal activa apuntando al punto débil f7." },
-        { san: "Nf6", razon: "El rival contraataca de inmediato tu peón central de e4.", nota: "Dos Caballos" },
+        { san: "Nf6", razon: "El rival contraataca de inmediato tu peón central de e4.", nota: "Italiana tranquila" },
         { san: "d3", razon: "Defiende con solidez el peón de e4 y abre la diagonal de tu alfil de c1." },
         { san: "Be7", razon: "El rival desarrolla su alfil de forma sólida preparando el enroque." },
         { san: "c3", razon: "Prepara el avance d4 para el centro." },

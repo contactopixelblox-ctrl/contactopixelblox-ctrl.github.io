@@ -36,6 +36,11 @@ let lastMove = [];
 let isLocked = false;
 let pendingContinue = false;
 let session = 0;
+let plannedDeviation = null;   // desvío elegido para esta partida de Práctica
+let freeMoves = null;          // null = en el libro; número = jugadas libres hechas
+const FREE_MOVES = 4;
+const DEVIATION_CHANCE = 0.25;
+const ADVICE = "Controla el centro, desarrolla tus piezas, enroca pronto y revisa si queda alguna pieza colgada.";
 const timers = new Set();
 
 // Todo temporizador queda ligado a la sesión: al reiniciar se cancela
@@ -96,7 +101,7 @@ $("checklistBanner").addEventListener("click", () => checklistModal.classList.ad
 $("btnCloseModal").addEventListener("click", () => checklistModal.classList.remove("open"));
 checklistModal.addEventListener("click", e => { if (e.target === checklistModal) checklistModal.classList.remove("open"); });
 
-autoToggle.checked = store.get("auto", true) !== false;
+autoToggle.checked = store.get("auto", false) === true;
 autoToggle.addEventListener("change", () => {
   store.set("auto", autoToggle.checked);
   if (autoToggle.checked && pendingContinue) continuePractice();
@@ -127,9 +132,10 @@ btnContinue.addEventListener("click", () => continuePractice());
 
 function continuePractice() {
   if (!pendingContinue) return;
+  const next = pendingContinue;
   pendingContinue = false;
   btnContinue.disabled = true;
-  opponentTurn();
+  next();
 }
 
 function resetSession() {
@@ -146,6 +152,8 @@ function resetSession() {
   lastMove = [];
   clearSelection();
   clearHint();
+  freeMoves = null;
+  plannedDeviation = null;
 
   const op = opening();
   $("openingTitle").textContent = op.name;
@@ -161,8 +169,62 @@ function resetSession() {
   updateStats();
 
   if (learn) return updateLearnUI();
+  plannedDeviation = planDeviation(activeLine);
   if (op.userColor === "w") userTurn();
   else opponentTurn();
+}
+
+// A veces (25 %) el rival se saldrá del libro en un punto de la línea
+function planDeviation(line) {
+  if (Math.random() >= (window.EA.probDesvio ?? DEVIATION_CHANCE)) return null;
+  const path = line.map(n => n.san);
+  const options = opening().desvios.filter(d =>
+    selectedVariantId === "random" || d.tras.every((san, i) => path[i] === san));
+  return options[Math.floor(Math.random() * options.length)] || null;
+}
+
+function showFreeTurn(title) {
+  isLocked = false;
+  $("stepCounter").textContent = `Libre ${freeMoves} / ${FREE_MOVES}`;
+  setCard(title, `${ADVICE} Te quedan ${FREE_MOVES - freeMoves} jugadas libres.`, "feedback-warn");
+}
+
+function freeReply() {
+  isLocked = true;
+  later(() => {
+    const move = window.EA.motor.elegir(game.fen(), "medio");
+    executeMove(move, m => {
+      if (game.game_over()) return finishFree();
+      showFreeTurn(`Rival: ${window.EA.aEspanol(m.san)} · Tu turno`);
+    });
+  }, 450);
+}
+
+function freeUserMove(from, to) {
+  executeMove({ from, to, promotion: "q" }, () => {
+    freeMoves++;
+    if (freeMoves >= FREE_MOVES || game.game_over()) return finishFree();
+    waitThen(() => freeReply(), "Jugada hecha", ADVICE, "feedback-warn");
+  });
+}
+
+function finishFree() {
+  isLocked = true;
+  $("stepCounter").textContent = "Terminado";
+  const mate = game.in_checkmate() ? "Hubo jaque mate. " : "";
+  setCard("Fin de la práctica libre", `${mate}${ADVICE} Toca «Reiniciar» para otra ronda.`, "feedback-success");
+}
+
+// Tras tu jugada: avanza solo o espera a «Continuar», según el ajuste
+function waitThen(next, title, text, cls) {
+  isLocked = true;
+  setCard(title, text, cls);
+  if (autoToggle.checked) {
+    later(next, 1800);
+  } else {
+    pendingContinue = next;
+    btnContinue.disabled = false;
+  }
 }
 
 function updateLearnUI() {
@@ -199,6 +261,15 @@ function userTurn(prev) {
 }
 
 function opponentTurn() {
+  const d = plannedDeviation;
+  if (d && d.tras.join(" ") === game.history().join(" ")) {
+    isLocked = true;
+    return later(() => executeMove(d.san, () => {
+      freeMoves = 0;
+      showFreeTurn("El rival se salió del libro");
+      $("moveExplanation").textContent = `Jugó ${window.EA.aEspanol(d.san)}. ${$("moveExplanation").textContent}`;
+    }), 450);
+  }
   const nodes = expectedNodes();
   if (!nodes.length) return finishLine();
   isLocked = true;
@@ -243,6 +314,8 @@ function handleUserMove(from, to) {
   const attempt = new Chess(game.fen()).move({ from, to, promotion: "q" });
   if (!attempt) return shake(from);
 
+  if (freeMoves !== null) return freeUserMove(from, to);
+
   if (currentMode === "learn") {
     const node = activeLine[currentStep];
     if (node && attempt.san === node.san) {
@@ -264,14 +337,7 @@ function handleUserMove(from, to) {
     currentStep++;
     currentChildren = match.children;
     if (!expectedNodes().length) return finishLine();
-    isLocked = true;
-    setCard(`✓ ${match.label}`, match.reason, "feedback-success");
-    if (autoToggle.checked) {
-      later(opponentTurn, 1800);
-    } else {
-      pendingContinue = true;
-      btnContinue.disabled = false;
-    }
+    waitThen(opponentTurn, `✓ ${match.label}`, match.reason, "feedback-success");
   });
 }
 
@@ -327,7 +393,7 @@ function executeMove(san, onComplete) {
     lastMove = [m.from, m.to];
     renderBoard();
     isLocked = false;
-    if (onComplete) onComplete();
+    if (onComplete) onComplete(m);
   }, 260);
 }
 

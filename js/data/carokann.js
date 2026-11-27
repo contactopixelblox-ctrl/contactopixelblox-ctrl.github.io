@@ -5,6 +5,15 @@ window.EA = window.EA || { aperturas: {} };
 window.EA.aperturas.carokann = {
   nombre: "Defensa Caro-Kann",
   color: "b",
+  // Jugadas razonables del rival fuera del libro (se juegan a veces en Práctica)
+  desvios: [
+    { tras: ["e4", "c6"], san: "Nf3" },
+    { tras: ["e4", "c6"], san: "Nc3" },
+    { tras: ["e4", "c6"], san: "Bc4" },
+    { tras: ["e4", "c6"], san: "d3" },
+    { tras: ["e4", "c6", "d4", "d5"], san: "Nd2" },
+    { tras: ["e4", "c6", "d4", "d5"], san: "f3" }
+  ],
   variantes: [
     {
       id: "clasica",

@@ -16,6 +16,7 @@ Publicada en: https://contactopixelblox-ctrl.github.io/
 | `js/splash.js` | Pantalla de carga |
 | `js/arbol.js` | Construye el árbol de variantes |
 | `tools/validar.js` | Valida las jugadas con chess.js (Node) |
+| `js/motor.js` | Motor que elige las jugadas libres y las de la IA |
 | `js/pieces.js` | Piezas en SVG |
 | `js/data/italiana.js` | Variantes de la Italiana |
 | `js/data/carokann.js` | Variantes de la Caro-Kann |
