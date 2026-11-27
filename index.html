@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Entrenador de Aperturas - Italiana y Caro-Kann</title>
+  <title>ChessClau - Entrenador de aperturas</title>
   <meta name="theme-color" content="#161a22">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/style.css?v=5.1.0">
+  <link rel="stylesheet" href="css/style.css?v=5.2.0">
 </head>
 <body>
 
@@ -16,7 +16,7 @@
   <div class="splash" id="splash" role="dialog" aria-modal="true" aria-labelledby="splashTitle">
     <div class="splash-box">
       <div class="splash-icon" aria-hidden="true">♞</div>
-      <h1 id="splashTitle">Entrenador de Aperturas</h1>
+      <h1 id="splashTitle">ChessClau</h1>
       <p class="splash-version" id="splashVersion"></p>
       <div class="splash-bar" id="splashBar"><div></div></div>
       <p id="splashStatus" aria-live="polite">Cargando…</p>
@@ -215,23 +215,29 @@
         <h4>Historial de cambios</h4>
         <div id="changeLog"></div>
       </section>
+      <section class="sheet-card">
+        <h4>Creadores</h4>
+        <p class="menu-version"><strong>Gerson</strong>: idea, dirección y pruebas.</p>
+        <p class="menu-version"><strong>Claude</strong> (Anthropic): programación.</p>
+        <p class="menu-credit">El nombre ChessClau es en honor a los dos.</p>
+      </section>
       <p class="menu-credit">Análisis: Stockfish 19 mediante <a href="https://github.com/nmrugg/stockfish.js" target="_blank" rel="noopener">Stockfish.js</a>, licencia <a href="js/lib/stockfish/LICENSE.txt" target="_blank">GPL-3.0</a>.</p>
     </div>
   </div>
 
-  <script src="js/lib/chess.min.js?v=5.1.0"></script>
-  <script src="js/pieces.js?v=5.1.0"></script>
-  <script src="js/data/italiana.js?v=5.1.0"></script>
-  <script src="js/data/carokann.js?v=5.1.0"></script>
-  <script src="js/arbol.js?v=5.1.0"></script>
-  <script src="js/motor.js?v=5.1.0"></script>
-  <script src="js/sonidos.js?v=5.1.0"></script>
-  <script src="js/version.js?v=5.1.0"></script>
-  <script src="js/menu.js?v=5.1.0"></script>
-  <script src="js/app.js?v=5.1.0"></script>
-  <script src="js/analisis.js?v=5.1.0"></script>
-  <script src="js/pgn.js?v=5.1.0"></script>
-  <script src="js/splash.js?v=5.1.0"></script>
-  <script src="js/offline.js?v=5.1.0"></script>
+  <script src="js/lib/chess.min.js?v=5.2.0"></script>
+  <script src="js/pieces.js?v=5.2.0"></script>
+  <script src="js/data/italiana.js?v=5.2.0"></script>
+  <script src="js/data/carokann.js?v=5.2.0"></script>
+  <script src="js/arbol.js?v=5.2.0"></script>
+  <script src="js/motor.js?v=5.2.0"></script>
+  <script src="js/sonidos.js?v=5.2.0"></script>
+  <script src="js/version.js?v=5.2.0"></script>
+  <script src="js/menu.js?v=5.2.0"></script>
+  <script src="js/app.js?v=5.2.0"></script>
+  <script src="js/analisis.js?v=5.2.0"></script>
+  <script src="js/pgn.js?v=5.2.0"></script>
+  <script src="js/splash.js?v=5.2.0"></script>
+  <script src="js/offline.js?v=5.2.0"></script>
 </body>
 </html>

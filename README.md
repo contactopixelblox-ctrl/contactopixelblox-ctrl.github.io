@@ -1,4 +1,4 @@
-# Entrenador de Aperturas
+# ChessClau
 
 App web para aprender la **Apertura Italiana** (con blancas) y la **Defensa Caro-Kann** (con negras). Tiene modos Aprender, Práctica y Vs IA (tres niveles). Es HTML, CSS y JavaScript sin compilación ni dependencias externas.
 

@@ -3,6 +3,10 @@
 window.EA = window.EA || { aperturas: {} };
 
 window.EA.historial = [
+  { version: "5.2.0", fecha: "27/11/2026", cambios: [
+    "La app ahora se llama ChessClau.",
+    "Créditos de los creadores en Más."
+  ] },
   { version: "5.1.0", fecha: "27/11/2026", cambios: [
     "Lector de PGN: pega o abre tus partidas y revísalas sobre el tablero."
   ] },
