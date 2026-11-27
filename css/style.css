@@ -442,3 +442,10 @@ button, select, .checklist-bar { touch-action: manipulation; }
 @keyframes cargar { from { width: 0; } to { width: 100%; } }
 .splash-news { text-align: left; background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-size: 0.9rem; }
 .splash-news ul { padding-left: 18px; line-height: 1.4; }
+
+/* Tres modos: en Vs IA ocupan todo el ancho; en pantallas bajas reciben más espacio */
+#openingTabs[style*="none"] + #modeTabs { grid-column: 1 / -1; }
+@media (max-height: 760px) and (orientation: portrait) {
+  .controls-top { grid-template-columns: 0.85fr 1.15fr; }
+  #modeTabs .tab-btn { flex: auto; font-size: 0.68rem; }
+}
