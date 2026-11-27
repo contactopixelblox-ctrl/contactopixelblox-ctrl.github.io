@@ -170,6 +170,8 @@ function resetSession() {
 
   if (learn) return updateLearnUI();
   plannedDeviation = planDeviation(activeLine);
+  $("stepCounter").textContent = "Jugada 1";
+  setCard("Práctica", "Prepárate para jugar.");
   if (op.userColor === "w") userTurn();
   else opponentTurn();
 }
