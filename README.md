@@ -17,6 +17,8 @@ Publicada en: https://contactopixelblox-ctrl.github.io/
 | `js/arbol.js` | Construye el árbol de variantes |
 | `tools/validar.js` | Valida las jugadas con chess.js (Node) |
 | `js/motor.js` | Motor que elige las jugadas libres y las de la IA |
+| `sw.js`, `js/offline.js` | Uso sin conexión |
+| `manifest.webmanifest`, `icons/` | Instalación en Android |
 | `js/pieces.js` | Piezas en SVG |
 | `js/data/italiana.js` | Variantes de la Italiana |
 | `js/data/carokann.js` | Variantes de la Caro-Kann |
@@ -61,5 +63,9 @@ node tools/validar.js
 ## Cómo publicar una versión
 
 1. Añade una entrada al inicio de la lista en `js/version.js`.
-2. Cambia todos los `?v=` de `index.html` al mismo número, para que el navegador pida los archivos nuevos.
+2. Cambia todos los `?v=` de `index.html` y `VERSION` en `sw.js` al mismo número, y ejecuta `node tools/validar.js`. Si creas un archivo nuevo, añádelo también a la lista de `sw.js`.
 3. Comprueba la versión en el menú **☰** de la app.
+
+## Instalar en Android
+
+Abre la web en Chrome, toca **⋮ → Añadir a pantalla de inicio** (o **Instalar app**). Antes de usarla sin internet, ábrela una vez conectado y espera a que el menú **☰** diga «Sin conexión: lista ✓». Para probarlo en un computador usa un servidor local (`python3 -m http.server`); abriendo el archivo directo no se activa el service worker.
