@@ -3,6 +3,15 @@
 window.EA = window.EA || { aperturas: {} };
 
 window.EA.historial = [
+  { version: "4.0.0", fecha: "26/11/2026", cambios: [
+    "Nuevo modo Vs IA: tres niveles, con blancas o negras.",
+    "Sonidos, que puedes apagar en el menú ☰.",
+    "En Práctica el rival a veces se sale del libro y juegas 4 jugadas libres.",
+    "Avance automático desactivado por defecto.",
+    "Instalable en Android y preparada para usarse sin conexión.",
+    "Variantes en un formato fácil de ampliar, con validador.",
+    "\"Dos Caballos\" ahora se llama \"Italiana tranquila vs 3...Cf6\"."
+  ] },
   { version: "3.3.0", fecha: "26/11/2026", cambios: [
     "Nueva pantalla de carga con la versión y los cambios recientes."
   ] },
