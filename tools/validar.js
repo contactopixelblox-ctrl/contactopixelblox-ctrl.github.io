@@ -79,7 +79,7 @@ if (fs.existsSync(swPath)) {
   const sw = fs.readFileSync(swPath, "utf8");
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
   if (!sw.includes(`const VERSION = "${version}"`)) errores.push(`sw.js: VERSION debe ser ${version}`);
-  [...html.matchAll(/(?:href|src)="((?:css|js)\/[^"]+)"/g)].forEach(([, ref]) => {
+  [...html.matchAll(/(?:href|src)="((?:css|js)\/[^"]+\.(?:css|js)(?:\?[^"]*)?)"/g)].forEach(([, ref]) => {
     const [archivo, v] = ref.split("?v=");
     if (v !== version) errores.push(`index.html: ${archivo} debe usar ?v=${version}`);
     if (!sw.includes(`"${archivo}"`)) errores.push(`sw.js: falta ${archivo}`);

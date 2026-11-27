@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/style.css?v=4.0.0">
+  <link rel="stylesheet" href="css/style.css?v=4.1.0">
 </head>
 <body>
 
@@ -86,7 +86,14 @@
     <!-- Controles Vs IA -->
     <div class="action-buttons" id="aiControls" style="display: none;">
       <button class="btn btn-secondary" id="btnUndoAi" disabled>↶ Deshacer</button>
-      <button class="btn btn-primary" id="btnNewAi">Nueva partida</button>
+      <button class="btn btn-success" id="btnAnalyze" disabled>Analizar</button>
+      <button class="btn btn-primary" id="btnNewAi">Nueva</button>
+    </div>
+
+    <!-- Controles Repaso -->
+    <div class="action-buttons" id="reviewControls" style="display: none;">
+      <button class="btn btn-secondary" id="btnBackReport">← Informe</button>
+      <button class="btn btn-primary" id="btnShowSolution">Ver jugada</button>
     </div>
 
     <!-- Controles Práctica -->
@@ -109,6 +116,15 @@
     </div>
   </div>
 
+  <!-- Informe de la partida -->
+  <div class="modal-overlay" id="analysisModal">
+    <div class="modal-box analysis-box" role="dialog" aria-modal="true" aria-labelledby="analysisTitle">
+      <h3 id="analysisTitle">Análisis de la partida</h3>
+      <div id="analysisBody"></div>
+      <button type="button" class="btn btn-primary" id="btnCloseAnalysis">Cerrar</button>
+    </div>
+  </div>
+
   <!-- Menú: versión y cambios -->
   <div class="modal-overlay" id="menuModal">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
@@ -118,22 +134,24 @@
       <label class="menu-option"><input type="checkbox" id="soundToggle"> Sonidos</label>
       <h4>Historial de cambios</h4>
       <div id="changeLog"></div>
+      <p class="menu-credit">Análisis: Stockfish 19 mediante <a href="https://github.com/nmrugg/stockfish.js" target="_blank" rel="noopener">Stockfish.js</a>, licencia <a href="js/lib/stockfish/LICENSE.txt" target="_blank">GPL-3.0</a>.</p>
       <button type="button" class="btn btn-secondary menu-action" id="btnReload">Recargar app</button>
       <button type="button" class="btn btn-primary menu-action" id="btnCloseMenu">Cerrar</button>
     </div>
   </div>
 
-  <script src="js/lib/chess.min.js?v=4.0.0"></script>
-  <script src="js/pieces.js?v=4.0.0"></script>
-  <script src="js/data/italiana.js?v=4.0.0"></script>
-  <script src="js/data/carokann.js?v=4.0.0"></script>
-  <script src="js/arbol.js?v=4.0.0"></script>
-  <script src="js/motor.js?v=4.0.0"></script>
-  <script src="js/sonidos.js?v=4.0.0"></script>
-  <script src="js/version.js?v=4.0.0"></script>
-  <script src="js/menu.js?v=4.0.0"></script>
-  <script src="js/app.js?v=4.0.0"></script>
-  <script src="js/splash.js?v=4.0.0"></script>
-  <script src="js/offline.js?v=4.0.0"></script>
+  <script src="js/lib/chess.min.js?v=4.1.0"></script>
+  <script src="js/pieces.js?v=4.1.0"></script>
+  <script src="js/data/italiana.js?v=4.1.0"></script>
+  <script src="js/data/carokann.js?v=4.1.0"></script>
+  <script src="js/arbol.js?v=4.1.0"></script>
+  <script src="js/motor.js?v=4.1.0"></script>
+  <script src="js/sonidos.js?v=4.1.0"></script>
+  <script src="js/version.js?v=4.1.0"></script>
+  <script src="js/menu.js?v=4.1.0"></script>
+  <script src="js/app.js?v=4.1.0"></script>
+  <script src="js/analisis.js?v=4.1.0"></script>
+  <script src="js/splash.js?v=4.1.0"></script>
+  <script src="js/offline.js?v=4.1.0"></script>
 </body>
 </html>

@@ -20,6 +20,8 @@ Publicada en: https://contactopixelblox-ctrl.github.io/
 | `sw.js`, `js/offline.js` | Uso sin conexión |
 | `manifest.webmanifest`, `icons/` | Instalación en Android |
 | `js/sonidos.js` | Sonidos generados con Web Audio (sin archivos de audio) |
+| `js/analisis.js` | Informe de la partida y repaso |
+| `js/lib/stockfish/` | Stockfish 19 lite (GPL-3.0) |
 | `js/pieces.js` | Piezas en SVG |
 | `js/data/italiana.js` | Variantes de la Italiana |
 | `js/data/carokann.js` | Variantes de la Caro-Kann |
@@ -70,3 +72,12 @@ node tools/validar.js
 ## Instalar en Android
 
 Abre la web en Chrome, toca **⋮ → Añadir a pantalla de inicio** (o **Instalar app**). Antes de usarla sin internet, ábrela una vez conectado y espera a que el menú **☰** diga «Sin conexión: lista ✓». Para probarlo en un computador usa un servidor local (`python3 -m http.server`); abriendo el archivo directo no se activa el service worker.
+
+## Análisis de partidas
+
+En **Vs IA**, el botón **Analizar** usa Stockfish en un Web Worker (solo desde un servidor web o la app instalada). La clasificación se basa en la caída estimada de opciones de ganar: menos de 2 puntos excelente, menos de 5 buena, menos de 10 imprecisión, menos de 20 error y desde 20 error grave. Son umbrales propios y aproximados.
+
+## Licencias de terceros
+
+- chess.js 0.10.3: BSD (cabecera en `js/lib/chess.min.js`).
+- Stockfish 19, compilado por [Stockfish.js](https://github.com/nmrugg/stockfish.js) (paquete npm `stockfish` 19.0.1, sin modificar): GPL-3.0, texto en `js/lib/stockfish/LICENSE.txt`. Código fuente en ese repositorio.

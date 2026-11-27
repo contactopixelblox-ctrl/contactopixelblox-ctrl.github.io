@@ -1,6 +1,6 @@
 // Service worker: primero la red (para recibir cambios) y, si falla o tarda, la copia guardada.
 // Al publicar una versión, cambia VERSION (tools/validar.js comprueba que coincida).
-const VERSION = "4.0.0";
+const VERSION = "4.1.0";
 const CACHE = "ea-" + VERSION;
 const CON_VERSION = [
   "css/style.css",
@@ -14,8 +14,15 @@ const CON_VERSION = [
   "js/version.js",
   "js/menu.js",
   "js/app.js",
+  "js/analisis.js",
   "js/splash.js",
   "js/offline.js"
+];
+// Stockfish (unos 1,9 MB) va en una caché propia: no se descarga de nuevo en cada versión
+const CACHE_SF = "sf-19.0.1";
+const STOCKFISH = [
+  "js/lib/stockfish/stockfish-19-lite-single.js",
+  "js/lib/stockfish/stockfish-19-lite-single.wasm"
 ];
 const FIJOS = [
   "./",
@@ -30,6 +37,10 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE)
       .then(c => c.addAll(urls.map(u => new Request(u, { cache: "reload" }))))
+      .then(() => caches.open(CACHE_SF))
+      .then(async c => {
+        for (const f of STOCKFISH) if (!(await c.match(f))) await c.add(f);
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -64,5 +75,11 @@ async function responder(request) {
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || url.origin !== location.origin) return;
+  if (url.pathname.includes("/js/lib/stockfish/") && !url.pathname.endsWith(".txt")) {
+    event.respondWith(caches.open(CACHE_SF)
+      .then(c => c.match(event.request, { ignoreSearch: true }))
+      .then(r => r || fetch(event.request)));
+    return;
+  }
   event.respondWith(responder(event.request));
 });

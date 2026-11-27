@@ -37,6 +37,7 @@ let isLocked = false;
 let pendingContinue = false;
 let session = 0;
 let plannedDeviation = null;   // desvío elegido para esta partida de Práctica
+let gameClosed = false;        // partida Vs IA cerrada para analizarla
 let freeMoves = null;          // null = en el libro; número = jugadas libres hechas
 const FREE_MOVES = 4;
 const DEVIATION_CHANCE = 0.25;
@@ -173,6 +174,8 @@ function resetSession() {
   clearHint();
   freeMoves = null;
   plannedDeviation = null;
+  gameClosed = false;
+  window.EA.analisis?.reiniciar();
 
   const op = opening();
   const ai = currentMode === "ai";
@@ -263,7 +266,9 @@ function waitThen(next, title, text, cls) {
 function updateUndo() {
   // Se puede deshacer cuando ya hiciste al menos una jugada y la IA no está pensando
   const mine = game.history().length >= (userColor() === "w" ? 1 : 2);
-  $("btnUndoAi").disabled = !mine || (isLocked && !game.game_over());
+  const thinking = isLocked && !game.game_over() && !gameClosed;
+  $("btnUndoAi").disabled = !mine || thinking || gameClosed;
+  $("btnAnalyze").disabled = game.history().length < 2 && !gameClosed;
 }
 
 function aiUserTurn(last) {
@@ -299,12 +304,13 @@ function finishAi() {
   } else if (game.in_stalemate()) text = "Rey ahogado.";
   else if (game.insufficient_material()) text = "No hay piezas suficientes para dar mate.";
   else if (game.in_threefold_repetition()) text = "La posición se repitió tres veces.";
-  setCard(title, text, cls);
+  setCard(title, `${text} Toca «Analizar» para revisar la partida.`, cls);
   updateUndo();
 }
 
 function undoAi() {
   if ($("btnUndoAi").disabled) return;
+  window.EA.analisis.reiniciar();
   session++;
   timers.forEach(clearTimeout);
   timers.clear();
@@ -405,6 +411,7 @@ function handleUserMove(from, to) {
   const attempt = new Chess(game.fen()).move({ from, to, promotion: "q" });
   if (!attempt) return shake(from);
 
+  if (currentMode === "ai" && window.EA.analisis.intento(from, to)) return;
   if (currentMode === "ai") return executeMove({ from, to, promotion: "q" }, () => aiTurn());
   if (freeMoves !== null) return freeUserMove(from, to);
 

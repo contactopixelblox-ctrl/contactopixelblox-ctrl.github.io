@@ -3,6 +3,11 @@
 window.EA = window.EA || { aperturas: {} };
 
 window.EA.historial = [
+  { version: "4.1.0", fecha: "26/11/2026", cambios: [
+    "Análisis de partidas Vs IA con Stockfish.",
+    "Cuenta jugadas de libro, brillantes, buenas, imprecisiones y errores.",
+    "Propone una jugada mejor y puedes practicarla moviendo la pieza."
+  ] },
   { version: "4.0.0", fecha: "26/11/2026", cambios: [
     "Nuevo modo Vs IA: tres niveles, con blancas o negras.",
     "Sonidos, que puedes apagar en el menú ☰.",
