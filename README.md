@@ -9,7 +9,7 @@ Toca **PGN** en la barra inferior, pega el texto (o abre un archivo `.pgn`), eli
 
 ## Curso «Italiana desde cero»
 
-Botón **Lecciones** de la barra inferior. Por ahora tiene 2 lecciones. Los textos y posiciones están en `js/data/curso-italiana.js` (el formato se explica al inicio del archivo) y el reproductor en `js/lecciones.js`, con su propio tablero. Las lecciones completadas se guardan en el teléfono (`ea_curso`). El paso de una lección sin terminar se guarda en `ea_curso_paso`. `tools/validar.js` comprueba que las jugadas del curso sean legales.
+Botón **Lecciones** de la barra inferior. Por ahora tiene 2 lecciones de 15 pasos. Los pasos añadidos después llevan `desde` y no entran al repaso hasta completarlos. El avance automático (opcional, apagado) se guarda en `ea_curso_auto`. Los textos y posiciones están en `js/data/curso-italiana.js` (el formato se explica al inicio del archivo) y el reproductor en `js/lecciones.js`, con su propio tablero. Las lecciones completadas se guardan en el teléfono (`ea_curso`). El paso de una lección sin terminar se guarda en `ea_curso_paso`. `tools/validar.js` comprueba que las jugadas del curso sean legales.
 
 ## Repaso espaciado
 
@@ -87,6 +87,8 @@ node tools/validar.js
 Abre la web en Chrome, toca **⋮ → Añadir a pantalla de inicio** (o **Instalar app**). Antes de usarla sin internet, ábrela una vez conectado y espera a que el menú **Más** diga «Sin conexión: lista ✓». Para probarlo en un computador usa un servidor local (`python3 -m http.server`); abriendo el archivo directo no se activa el service worker.
 
 ## Análisis de partidas
+
+En la revisión, **Play** reproduce la partida y se pausa al tocar cualquier otro control de navegación.
 
 En **Vs IA**, el botón **Analizar** abre un resumen y la revisión sobre el tablero. El análisis usa Stockfish en un Web Worker (solo desde un servidor web o la app instalada). La clasificación se basa en la caída estimada de opciones de ganar: menos de 2 puntos excelente, menos de 5 buena, menos de 10 imprecisión, menos de 20 error y desde 20 error grave. Son umbrales propios y aproximados.
 

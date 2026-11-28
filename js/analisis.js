@@ -211,6 +211,7 @@
 
   // Resumen: se toca una categoría para verla en el tablero
   function mostrarInforme() {
+    pausar();
     cuerpo.innerHTML = "";
     const mias = informe.jugadas.filter(j => j.color === informe.color);
     const suyas = informe.jugadas.filter(j => j.color !== informe.color);
@@ -269,6 +270,7 @@
   }
 
   function cerrarRevision() {
+    pausar();
     if (!document.body.classList.contains("reviewing")) return;
     document.body.classList.remove("reviewing");
     $("screenTitle").textContent = informe && informe.importada ? "Partida PGN" : "Jugar contra la IA";
@@ -330,7 +332,48 @@
     return partes.join(" ");
   }
 
-  function irA(ply, verMejor = false) {
+  /* ---------- Play: la partida avanza sola ---------- */
+  let reloj = 0;
+  function pausar() {
+    clearTimeout(reloj);
+    reloj = 0;
+    $("rvPlay").textContent = "▶ Play";
+  }
+  function paso() {
+    reloj = setTimeout(() => {
+      if (!reloj || !rv || !informe) return;
+      irA(rv.ply + 1, false, true);
+      sound("mover");
+      if (rv.ply < informe.sans.length) paso(); else pausar();
+    }, 1300);
+  }
+  function reproducir() {
+    if (reloj) return pausar();
+    if (rv.ply >= informe.sans.length) irA(0);
+    else if (rv.verMejor) irA(rv.ply);
+    $("rvPlay").textContent = "⏸ Pausa";
+    paso();
+  }
+
+  // Desliza la pieza (y la torre al enrocar) desde su casilla de origen
+  function deslizar(j) {
+    const de = j.uci.slice(0, 2), a = j.uci.slice(2, 4);
+    const movidas = [[de, a]];
+    if (j.san.startsWith("O-O")) {
+      const [antes, despues] = j.san.startsWith("O-O-O") ? ["a", "d"] : ["h", "f"];
+      movidas.push([antes + a[1], despues + a[1]]);
+    }
+    movidas.forEach(([x, y]) => {
+      const destino = squareEl(y), pieza = destino.querySelector(".piece");
+      if (!pieza || !pieza.animate) return;
+      const o = squareEl(x).getBoundingClientRect(), d = destino.getBoundingClientRect();
+      pieza.animate([{ transform: `translate(${o.left - d.left}px, ${o.top - d.top}px)` }, { transform: "none" }], { duration: 450, easing: "ease-in-out" });
+    });
+  }
+
+  function irA(ply, verMejor = false, auto = false) {
+    if (!auto) pausar();
+    const anterior = rv ? rv.ply : null;
     const total = informe.sans.length;
     ply = Math.max(0, Math.min(total, ply));
     const j = ply ? informe.jugadas[ply - 1] : null;
@@ -349,6 +392,7 @@
       if (j) {
         [j.uci.slice(0, 2), j.uci.slice(2, 4)].forEach(c => squareEl(c).classList.add("rv-tint", `tint-${j.tipo}`));
         squareEl(j.uci.slice(2, 4)).appendChild(marca(j.tipo, "mk-board"));
+        if (anterior === ply - 1) deslizar(j);
       }
     }
 
@@ -357,7 +401,7 @@
     $("rvTitle").textContent = !j ? "Inicio de la partida"
       : rv.verMejor ? `Mejor: ${es(j.mejorSan)}`
       : `${numero(j)} ${es(j.san)} ${FRASE[j.tipo]}`;
-    $("rvText").textContent = !j ? "Toca ▶ para recorrer la partida."
+    $("rvText").textContent = !j ? "Toca Play para ver la partida o ❯ para ir paso a paso."
       : rv.verMejor ? (j.uci === j.mejorUci ? "Flecha verde: la jugada propuesta." : "Verde: la propuesta. Roja: lo que se jugó.")
       : `${j.color === informe.color ? "Tu jugada." : informe.importada ? "Jugada del rival." : "Jugada de la IA."} ${explicacion(j)}`;
 
@@ -569,6 +613,8 @@
     volverAlFinal();
   });
   $("btnSummary").addEventListener("click", mostrarInforme);
+  $("rvPlay").addEventListener("click", reproducir);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) pausar(); });
   $("rvFirst").addEventListener("click", () => irA(0));
   $("rvPrev").addEventListener("click", () => irA(rv.ply - 1));
   $("rvNext").addEventListener("click", () => irA(rv.ply + 1));

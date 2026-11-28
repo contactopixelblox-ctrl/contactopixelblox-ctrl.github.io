@@ -3,6 +3,12 @@
 window.EA = window.EA || { aperturas: {} };
 
 window.EA.historial = [
+  { version: "5.5.0", fecha: "27/11/2026", cambios: [
+    "Lecciones 1 y 2 con 15 pasos: «¿Y si el rival…?» y ronda final.",
+    "Al terminar una lección: botón «Siguiente lección».",
+    "Avance automático opcional tras acertar (apagado al inicio).",
+    "En la revisión de partidas, botón Play: las piezas se mueven solas."
+  ] },
   { version: "5.4.0", fecha: "27/11/2026", cambios: [
     "Nuevo Repaso espaciado con las posiciones de tus lecciones.",
     "Aprender ahora es «Ver línea», dentro de Práctica.",

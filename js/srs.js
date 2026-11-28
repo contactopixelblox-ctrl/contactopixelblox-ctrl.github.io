@@ -16,7 +16,9 @@
   function tarjetas(curso, hechas, Chess) {
     const mapa = new Map();
     curso.lecciones.filter(l => hechas[l.id]).forEach(l => l.pasos.forEach(p => {
-      if (!p.correctas) return;
+      // true = completada con la primera versión del curso
+      const nivel = hechas[l.id] === true ? 1 : hechas[l.id];
+      if (!p.correctas || (p.desde || 1) > nivel) return;
       const game = p.fen ? new Chess(p.fen) : new Chess();
       (p.tras || []).forEach(san => game.move(san));
       const clave = game.fen().split(" ").slice(0, 4).join(" ");

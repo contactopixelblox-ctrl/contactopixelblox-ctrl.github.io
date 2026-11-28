@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/style.css?v=5.4.0">
+  <link rel="stylesheet" href="css/style.css?v=5.5.0">
 </head>
 <body>
 
@@ -117,8 +117,9 @@
       <div class="rv-graph" id="rvGraph" aria-label="Gráfica de ventaja: toca para saltar a una jugada"></div>
       <div class="rv-nav">
         <button type="button" class="btn btn-secondary" id="rvFirst" aria-label="Inicio">⏮</button>
-        <button type="button" class="btn btn-secondary" id="rvPrev" aria-label="Anterior">◀</button>
-        <button type="button" class="btn btn-primary" id="rvNext" aria-label="Siguiente">▶</button>
+        <button type="button" class="btn btn-secondary" id="rvPrev" aria-label="Anterior">❮</button>
+        <button type="button" class="btn btn-primary" id="rvPlay">▶ Play</button>
+        <button type="button" class="btn btn-secondary" id="rvNext" aria-label="Siguiente">❯</button>
         <button type="button" class="btn btn-secondary" id="rvLast" aria-label="Final">⏭</button>
       </div>
     </section>
@@ -190,6 +191,10 @@
           <button type="button" class="btn btn-secondary" id="lsHint">Pista</button>
           <button type="button" class="btn btn-primary" id="lsNext">Siguiente →</button>
         </div>
+        <div class="ls-extra">
+          <button type="button" class="ls-link" id="lsAuto">Avance automático: no</button>
+          <button type="button" class="ls-link" id="lsToList" hidden>Volver a la lista</button>
+        </div>
       </div>
     </div>
   </div>
@@ -258,23 +263,23 @@
     </div>
   </div>
 
-  <script src="js/lib/chess.min.js?v=5.4.0"></script>
-  <script src="js/pieces.js?v=5.4.0"></script>
-  <script src="js/data/italiana.js?v=5.4.0"></script>
-  <script src="js/data/carokann.js?v=5.4.0"></script>
-  <script src="js/data/curso-italiana.js?v=5.4.0"></script>
-  <script src="js/arbol.js?v=5.4.0"></script>
-  <script src="js/motor.js?v=5.4.0"></script>
-  <script src="js/sonidos.js?v=5.4.0"></script>
-  <script src="js/version.js?v=5.4.0"></script>
-  <script src="js/menu.js?v=5.4.0"></script>
-  <script src="js/app.js?v=5.4.0"></script>
-  <script src="js/analisis.js?v=5.4.0"></script>
-  <script src="js/pgn.js?v=5.4.0"></script>
-  <script src="js/srs.js?v=5.4.0"></script>
-  <script src="js/lecciones.js?v=5.4.0"></script>
-  <script src="js/atras.js?v=5.4.0"></script>
-  <script src="js/splash.js?v=5.4.0"></script>
-  <script src="js/offline.js?v=5.4.0"></script>
+  <script src="js/lib/chess.min.js?v=5.5.0"></script>
+  <script src="js/pieces.js?v=5.5.0"></script>
+  <script src="js/data/italiana.js?v=5.5.0"></script>
+  <script src="js/data/carokann.js?v=5.5.0"></script>
+  <script src="js/data/curso-italiana.js?v=5.5.0"></script>
+  <script src="js/arbol.js?v=5.5.0"></script>
+  <script src="js/motor.js?v=5.5.0"></script>
+  <script src="js/sonidos.js?v=5.5.0"></script>
+  <script src="js/version.js?v=5.5.0"></script>
+  <script src="js/menu.js?v=5.5.0"></script>
+  <script src="js/app.js?v=5.5.0"></script>
+  <script src="js/analisis.js?v=5.5.0"></script>
+  <script src="js/pgn.js?v=5.5.0"></script>
+  <script src="js/srs.js?v=5.5.0"></script>
+  <script src="js/lecciones.js?v=5.5.0"></script>
+  <script src="js/atras.js?v=5.5.0"></script>
+  <script src="js/splash.js?v=5.5.0"></script>
+  <script src="js/offline.js?v=5.5.0"></script>
 </body>
 </html>

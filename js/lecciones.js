@@ -10,6 +10,32 @@
   let elegida = null, resuelto = false, pistas = 0, ultima = [], marcasPista = [];
   let sesion = null;   // repaso en curso: { cola, total, hechas, extra, falladas }
   const srs = window.EA.srs;
+  let esperando = false, relojRival = 0, relojAuto = 0;
+  const version = l => Math.max(...l.pasos.map(p => p.desde || 1));
+  const nivel = v => v === true ? 1 : v || 0;
+  const conAuto = () => { try { return localStorage.getItem("ea_curso_auto") === "1"; } catch (e) { return false; } };
+
+  function botonAuto() {
+    $("lsAuto").textContent = relojAuto ? "⏸ Detener (avanza solo)" : `Avance automático: ${conAuto() ? "sí" : "no"}`;
+  }
+  function pararAuto() {
+    clearTimeout(relojAuto);
+    relojAuto = 0;
+    botonAuto();
+  }
+  // Solo tras acertar y nunca en el último paso. Más texto, más tiempo.
+  function programarAuto(texto) {
+    pararAuto();
+    if (!conAuto() || esFinal()) return;
+    relojAuto = setTimeout(() => { relojAuto = 0; $("lsNext").click(); }, Math.min(9000, Math.max(2500, texto.length * 65)));
+    botonAuto();
+  }
+  function parar() {
+    clearTimeout(relojRival);
+    esperando = false;
+    pararAuto();
+  }
+  const esFinal = () => sesion ? sesion.cola.length === 1 && !sesion.repetir : indice === leccion.pasos.length - 1;
 
   function leer() {
     try { return JSON.parse(localStorage.getItem("ea_curso")) || {}; } catch (e) { return {}; }
@@ -22,7 +48,7 @@
   }
   function completar(id) {
     const datos = leer();
-    datos[id] = true;
+    datos[id] = version(curso.lecciones.find(l => l.id === id));
     guardar("ea_curso", datos);
     guardarPaso(id, 0);
     contar();
@@ -42,6 +68,7 @@
   }
 
   function verLista() {
+    parar();
     leccion = null;
     sesion = null;
     $("lsList").hidden = false;
@@ -60,7 +87,8 @@
       b.querySelector(".ls-num").classList.toggle("done", !!hechas[l.id]);
       b.querySelector("strong").textContent = l.titulo;
       const guardado = cargar("ea_curso_paso")[l.id];
-      b.querySelector("small").textContent = guardado ? `${l.resumen} Sigues en el paso ${guardado + 1} de ${l.pasos.length}.` : l.resumen;
+      const hayNuevo = hechas[l.id] && nivel(hechas[l.id]) < version(l);
+      b.querySelector("small").textContent = guardado ? `${l.resumen} Sigues en el paso ${guardado + 1} de ${l.pasos.length}.` : hayNuevo ? `${l.resumen} Hay práctica nueva.` : l.resumen;
       b.addEventListener("click", () => abrir(l));
       caja.appendChild(b);
     });
@@ -69,7 +97,10 @@
   function abrir(l) {
     leccion = l;
     sesion = null;
-    indice = Math.min(cargar("ea_curso_paso")[l.id] || 0, l.pasos.length - 1);
+    // Si ya la completaste y hay pasos nuevos, empieza en el primero de ellos
+    const hecha = nivel(leer()[l.id]);
+    const primero = hecha ? Math.max(0, l.pasos.findIndex(p => (p.desde || 1) > hecha)) : 0;
+    indice = Math.min(cargar("ea_curso_paso")[l.id] || primero, l.pasos.length - 1);
     $("lsList").hidden = true;
     $("lsPlayer").hidden = false;
     $("lsBack").hidden = false;
@@ -88,6 +119,7 @@
   const plural = n => `${n} ${n === 1 ? "posición" : "posiciones"}`;
 
   function verRepaso(aviso) {
+    parar();
     leccion = null;
     sesion = null;
     $("lsList").hidden = false;
@@ -155,9 +187,12 @@
   }
 
   function mostrar() {
+    parar();
     const p = paso();
     game = p.fen ? new Chess(p.fen) : new Chess();
     (p.tras || []).forEach(san => game.move(san));
+    const jugadas = game.history();
+    const delRival = p.rival && jugadas.length ? game.undo() : null;
     elegida = null;
     resuelto = !p.correctas;
     pistas = 0;
@@ -168,8 +203,7 @@
       sesion.conAyuda = false;
       $("lsBar").style.width = `${(sesion.hechas / sesion.total) * 100}%`;
       $("lsKind").textContent = `Sin flechas · quedan ${sesion.cola.length}`;
-      $("lsStepTitle").textContent = `¿Qué juegas con ${game.turn() === "w" ? "blancas" : "negras"}?`;
-      const jugadas = game.history();
+      $("lsStepTitle").textContent = `¿Qué juegas con ${(p.tras || []).length % 2 || (p.fen && game.turn() === "b") ? "negras" : "blancas"}?`;
       const antes = jugadas.map((s, i) => (i % 2 ? "" : `${i / 2 + 1}. `) + window.EA.aEspanol(s)).join(" ");
       $("lsText").textContent = (antes ? `Van: ${antes}. ` : "") + (p.repaso || p.texto);
     } else {
@@ -184,16 +218,39 @@
     pintar();
     flechas(sesion ? [] : p.flechas);
     botones();
+    if (delRival) {
+      esperando = true;
+      relojRival = setTimeout(() => {
+        const m = game.move(delRival.san);
+        esperando = false;
+        ultima = [m.from, m.to];
+        pintar();
+        deslizar(m);
+        sonar("mover");
+      }, 650);
+    }
+  }
+
+  function deslizar(m) {
+    const origen = grid.querySelector(`[data-square="${m.from}"]`);
+    const destino = grid.querySelector(`[data-square="${m.to}"]`);
+    const pieza = destino && destino.querySelector(".piece");
+    if (!pieza || !pieza.animate) return;
+    const a = origen.getBoundingClientRect(), b = destino.getBoundingClientRect();
+    destino.style.zIndex = 15;
+    pieza.animate([{ transform: `translate(${a.left - b.left}px, ${a.top - b.top}px)` }, { transform: "none" }], { duration: 350, easing: "ease-in-out" });
   }
 
   function botones() {
-    const p = paso(), final = sesion ? sesion.cola.length === 1 && !sesion.repetir : indice === leccion.pasos.length - 1;
+    const p = paso(), final = esFinal();
     $("lsPrev").hidden = !!sesion;
     $("lsNext").parentElement.classList.toggle("review", !!sesion);
     $("lsPrev").disabled = indice === 0;
     $("lsHint").hidden = resuelto;
     $("lsNext").hidden = !resuelto;
-    $("lsNext").textContent = final ? "Terminar ✓" : "Siguiente →";
+    const otra = !sesion && curso.lecciones[curso.lecciones.indexOf(leccion) + 1];
+    $("lsNext").textContent = !final ? "Siguiente →" : sesion ? "Terminar ✓" : otra ? "Siguiente lección →" : "Ir a Repaso →";
+    $("lsToList").hidden = !!sesion || !final || !resuelto;
     $("lsHint").textContent = pistas ? "Ver jugada" : "Pista";
     $("lsHint").disabled = pistas > 1 || !p.correctas;
   }
@@ -247,6 +304,7 @@
   }
 
   function intentar(de, a) {
+    if (esperando) return;
     const p = paso();
     const prueba = new Chess(game.fen()).move({ from: de, to: a, promotion: "q" });
     elegida = null;
@@ -267,6 +325,7 @@
       feedback("✓ " + p.correctas[san], "ok");
       sonar("mover");
       botones();
+      programarAuto(p.correctas[san]);
     } else if (sesion && sesion.cola[0].alternativas.includes(san)) {
       pintar();
       feedback(`${window.EA.aEspanol(san)} también es buena, pero en esta línea se juega otra. No cuenta como fallo: prueba otra vez.`, "pista");
@@ -294,7 +353,7 @@
   };
   let inicio = null;
   grid.addEventListener("pointerdown", e => {
-    if (!e.isPrimary || resuelto) return;
+    if (!e.isPrimary || resuelto || esperando) return;
     const n = casillaEn(e);
     if (!n) return;
     if (elegida && game.moves({ square: elegida, verbose: true }).some(m => m.to === n)) return intentar(elegida, n);
@@ -315,6 +374,7 @@
   grid.addEventListener("pointercancel", () => { inicio = null; });
 
   $("lsHint").addEventListener("click", () => {
+    if (esperando) return;
     const [de, a] = paso().pista;
     pistas++;
     if (sesion) { sesion.conAyuda = true; fallo(); }
@@ -328,15 +388,26 @@
   $("lsNext").addEventListener("click", () => {
     if (sesion) return avanzarRepaso();
     if (indice < leccion.pasos.length - 1) { indice++; return mostrar(); }
+    const siguiente = curso.lecciones[curso.lecciones.indexOf(leccion) + 1];
+    terminar();
+    if (siguiente) abrir(siguiente); else verRepaso();
+  });
+  function terminar() {
     completar(leccion.id);
     sonar("exito");
-    verLista();
+  }
+  $("lsToList").addEventListener("click", () => { terminar(); verLista(); });
+  $("lsAuto").addEventListener("click", () => {
+    if (relojAuto) return pararAuto();
+    try { localStorage.setItem("ea_curso_auto", conAuto() ? "0" : "1"); } catch (e) {}
+    botonAuto();
   });
   $("lsPrev").addEventListener("click", () => { if (indice > 0) { indice--; mostrar(); } });
   $("lsBack").addEventListener("click", () => sesion ? verRepaso() : verLista());
   $("btnCourse").addEventListener("click", () => { verLista(); modal.classList.add("open"); });
   $("btnReview").addEventListener("click", () => { verRepaso(); modal.classList.add("open"); });
-  document.addEventListener("visibilitychange", contar);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) pararAuto(); contar(); });
+  botonAuto();
   contar();
-  $("lsClose").addEventListener("click", () => modal.classList.remove("open"));
+  $("lsClose").addEventListener("click", () => { parar(); modal.classList.remove("open"); });
 })();
